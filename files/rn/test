@@ -1,0 +1,17 @@
+GET / HTTP/1.1
+Host: 127.0.0.1:8000
+User-Agent: Go-http-client/1.1
+Accept: text/plain
+Accept-Charset: utf-8
+Accept-Language: en
+Accept-Encoding: gzip
+Origin: /
+Authorization: yes
+Transfer-Encoding: gzip
+Content-Length: 100
+Content-Type: text/plain
+Content-Language: en
+Content-Location: /
+Content-Encoding: gzip
+
+bodybody
