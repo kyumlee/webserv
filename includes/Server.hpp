@@ -24,6 +24,7 @@ class Server
 		int							_bodyEnd;
 		size_t						_bodyVecSize;
 		size_t						_bodyVecStartPos;
+		size_t						_rnPos;
 
 		//configuation file 관련
 		size_t						_clientMaxBodySize;

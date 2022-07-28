@@ -28,10 +28,10 @@ int				RequestHeader::checkRequestLine (std::string requestLine)
 	this->_path = *requestLineIt++;
 
 	//path이 /이고 GET일 때만 작동
-	if (this->_path == "/" && this->_method == "GET")
+/*	if (this->_path == "/" && this->_method == "GET")
 	{
 		this->_path.clear();
-		this->_path = this->_root + "/index.html";
+		this->_path = this->_root;
 	}
 	else if (this->_path != "/")
 	{
@@ -39,7 +39,9 @@ int				RequestHeader::checkRequestLine (std::string requestLine)
 			this->_path = "/" + this->_path;
 		if (this->_path.find(this->_root) == std::string::npos)
 			this->_path = this->_root + this->_path;
-	}
+	}*/
+	if (this->_path != "/" && this->_path.at(0) == '/')
+		this->_path = this->_path.substr(1, this->_path.length() - 1);
 
 	//GET method이고, request_line이 2개의 단어로 이루어져 있다면 HTTP/0.9버전이다.
 	//일단 바로 종료하도록 9를 리턴하도록 하자
@@ -72,7 +74,7 @@ int				RequestHeader::checkHeader (std::vector<std::string> header)
 		{
 			this->_host = findHeaderValue(*it);
 			// http://는 자른다.
-			if (_host.find("http://", 0) != std::string::npos)
+			if (_host.find("http://", 0) == 0)
 				_host = _host.substr(7, _host.length() - 7);
 			if (this->setListen(this->_host) == 1)
 				return (1);
@@ -181,7 +183,6 @@ int				RequestHeader::splitRequest (std::string request, int bodyCondition)
 	std::vector<std::string>			strHeader;
 	std::map<std::string, std::string>	ret;
 
-	std::cout << CYAN << "===============request===============\n" << request << RESET << std::endl;
 	while ((rPos = request.find('\n', start)) != std::string::npos)
 	{//\r을 계속 찾아서 그것을 기준으로 vector에 넣어주자.
 		if (request.at(start) == '\r')

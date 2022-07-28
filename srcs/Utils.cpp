@@ -470,6 +470,7 @@ int							makeHtml (const std::string& htmlName, int code,
 	return (0);
 }
 
+// 슬래쉬의 맨 뒤쪽으로 가서 파일 이름을 찾고, 슬래쉬가 없다면 그대로 path를 반환
 size_t						calExponent (const std::string& str)
 {
 	size_t	e_pos = str.find("e"), num, exponent;
@@ -481,7 +482,7 @@ size_t						calExponent (const std::string& str)
 		exponentStr = str.substr(e_pos + 1, str.length() - e_pos - 1);
 		num = std::atoi(numStr.c_str());
 		exponent = std::atoi(exponentStr.c_str());
-		return (num * powl(exponent, 10));
+		return (num * powl(10, exponent));
 	}
 	else
 		num = std::atoi(str.c_str());

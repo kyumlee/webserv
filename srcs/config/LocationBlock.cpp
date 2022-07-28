@@ -42,7 +42,8 @@ LocationBlock::LocationBlock (const LocationBlock &lb)
 	_index(lb._index),
 	_cgi(lb._cgi),
 	_locations(lb._locations),
-	_is_empty(lb._is_empty)
+	_is_empty(lb._is_empty),
+	_path(lb._path)
 {}
 
 LocationBlock::~LocationBlock() {}
@@ -59,8 +60,8 @@ LocationBlock	&LocationBlock::operator= (const LocationBlock &lb) {
 	_index = lb._index;
 	_cgi = lb._cgi,
 	_locations = lb._locations;
-	
-	this->_is_empty = lb._is_empty;
+	_is_empty = lb._is_empty;
+	_path = lb._path;
 
 	return (*this);
 }
@@ -115,6 +116,9 @@ int							LocationBlock::parseModMatch () {
 		return (printErr("invalid location block"));
 
 	setURI(_block.substr(pos, bracketPos - 1 - pos));
+	if (_uri != "/" && _uri.at(0) == '/')
+		_uri = _uri.substr(1, _uri.length() - 1);
+	std::cout << GREEN << "location block uri: " << getURI() << RESET << std::endl;
 
 	return (0);
 }
@@ -217,10 +221,10 @@ int							LocationBlock::parse () {
 		
 		std::string	nest_location_uri = this->_locations[i].getURI();
 		// std::cout << BLUE << "this uri : " << this->_uri << ", nest_location_uri : " << nest_location_uri << std::endl;
-		if (nest_location_uri.at(0) == '/')
-			this->_locations[i]._uri = this->_uri + nest_location_uri;
-		else
-			this->_locations[i]._uri = this->_uri + "/" + nest_location_uri;
+		// if (nest_location_uri.at(0) == '/')
+		//	this->_locations[i]._uri = this->_uri + nest_location_uri;
+		// else
+		//	this->_locations[i]._uri = this->_uri + "/" + nest_location_uri;
 		// std::cout << "this location uri : " << this->_locations[i]._uri << RESET << std::endl;
 	}
 	

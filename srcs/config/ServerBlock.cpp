@@ -250,7 +250,9 @@ int							ServerBlock::parse () {
 	for (size_t i = 0; i < locBlocks.size(); i++) {
 		addLocationBlock(LocationBlock(locBlocks[i]));
 		_locations[i].parse();
-		this->_locations[i].setURI(this->_root + this->_locations[i].getURI());
+		if (_locations[i].getRoot() == ".")
+			_locations[i].setRoot(getRoot());
+//		this->_locations[i].setURI(this->_root + this->_locations[i].getURI());
 	}
 
 	return (0);

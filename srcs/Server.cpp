@@ -24,6 +24,9 @@ void			Server::disconnectRequest(int request_fd)
 	this->_checkedRequestLine = 0;
 	this->_bodyStartPos = 0;
 	this->_bodyEnd = 0;
+	this->_bodyVecStartPos = 0;
+	this->_bodyVecSize = 0;
+	this->_rnPos = 0;
 }
 
 void			Server::checkConnection(int request_fd)
@@ -462,7 +465,6 @@ void			Server::eventRead (int fd)
 		if ((_bodyCondition == Body_Start || _bodyCondition == Body_End)
 			&& _bodyEnd == 0)
 		{
-			std::cout << "received data from " << fd << ": " << _request[fd] << std::endl;
 			if (checkRequestLineRet == 1 || checkRequestLineRet == 9)
 				;
 			else if (_response.splitRequest(_request[fd], _bodyCondition) == 1)
@@ -479,25 +481,28 @@ void			Server::eventRead (int fd)
 			this->_requestEnd = 1;
 			this->_request[fd] = this->_request[fd].substr(0, this->_bodyStartPos + this->_response._bodySize);
 		}
-		static size_t rnPos;
 		if (this->_response._transferEncoding == "chunked")
 		{//contentLength가 없고, transferEncoding이 chunked일 때 파일의 끝을 알리는 것이 들어올 때까지 계속 recv
 			if (this->_response._path != "/")
 			{
-				if (rnPos <= this->_bodyStartPos)
-					rnPos = this->_bodyStartPos;
+				if (_rnPos <= this->_bodyStartPos)
+					_rnPos = this->_bodyStartPos;
 				else
-					rnPos = this->_bodyVecStartPos;
-				size_t	bodySize = this->_request[fd].find("\r\n", rnPos);
+					_rnPos = this->_bodyVecStartPos;
+				size_t	bodySize = this->_request[fd].find("\r\n", _rnPos + 3);
+				std::cout << "rn pos: " << this->_rnPos << ", body start pos: " << this->_bodyStartPos << std::endl;
+				// std::cout << "!!!!!!!!request!!!!!!! << this->_request[fd].substr(0, _rnPos) << std::endl;
 				if (bodySize != std::string::npos && this->_bodyVecSize == 0)
 				{
-					std::string	bodySizeStr = this->_request[fd].substr(rnPos,
-						bodySize - rnPos);
+					std::string	bodySizeStr = this->_request[fd].substr(_rnPos, bodySize - _rnPos);
 					if (bodySizeStr.find("e") != std::string::npos)
 						this->_bodyVecSize = calExponent(bodySizeStr);
 					else
 						this->_bodyVecSize = std::atoi(bodySizeStr.c_str());
-					this->_bodyVecStartPos = bodySize + 2                     ;
+					this->_bodyVecStartPos = bodySize + 2;
+					_rnPos = _bodyVecStartPos = this->_bodyVecSize;
+					std::cout << GREEN << "body vec size: " << this->_bodyVecSize << std::endl;
+					// std::cout << "bodySizeStr: " << bodySizeStr << RESET << std::endl;
 					if (this->_bodyVecSize == 0)
 						this->_response.setCode(Bad_Request);
 				}
@@ -508,6 +513,7 @@ void			Server::eventRead (int fd)
 				std::string	_bodyElement = this->_request[fd].substr(this->_bodyVecStartPos,
 					this->_bodyVecSize);
 				this->_response._bodyVec.push_back(_bodyElement);
+				this->_bodyVecStartPos += this->_bodyVecSize;
 				this->_bodyVecSize = 0;
 			}
 			std::cout << RED << "body vec start pos: " << this->_bodyVecStartPos;
@@ -522,8 +528,7 @@ void			Server::eventRead (int fd)
 				this->_request[fd] = this->_request[fd].substr(0, this->_request[fd].length() - 5);
 				if (this->_bodyVecStartPos != 0)
 				{
-					std::string	_bodyElement = this->_request[fd].substr(this->_bodyVecStartPos,
-						this->_request[fd].length() - this->_bodyVecStartPos);
+					std::string	_bodyElement = this->_request[fd].substr(this->_bodyVecStartPos, this->_request[fd].length() - this->_bodyVecStartPos);
 					this->_response._bodyVec.push_back(_bodyElement);
 				}
 				std::cout << "receive file end\n";
@@ -551,10 +556,10 @@ void			Server::eventRead (int fd)
 			{
 				this->_response._body = this->_request[fd].substr(this->_bodyStartPos,
 					this->_request[fd].length() - this->_bodyStartPos);
-				if (this->_response._transferEncoding == "chunked" &&
-					this->_response._bodyVec.empty() == false)
+				if (this->_response._transferEncoding == "chunked" && this->_response._bodyVec.empty() == false)
 				{
-					this->_response._body = *this->_response._bodyVec.begin();
+					for (std::vector<std::string>::iterator it = _response._bodyVec.begin(); it != _response._bodyVec.end(); it++)
+						this->_response._body += *it;
 				}
 				// std::cout << YELLOW << "=====BODY=====\n" << this->_response._body << RESET << std::endl;
 			}
@@ -586,7 +591,8 @@ void			Server::eventWrite (int fd)
 				_bodyStartPos = 0;
 				_bodyEnd = 0;
 				this->_bodyVecSize = 0;
-			// 	this->_bodyVecStartPos = 0;
+				this->_bodyVecStartPos = 0;
+				this->_rnPos = 0;
 			}
 		}
 	}

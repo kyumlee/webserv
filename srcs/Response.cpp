@@ -55,15 +55,16 @@ int				Response::verifyMethod (int fd, Response *response, int requestEnd)
 
 	if (requestEnd)
 	{
-		if (response->getPath() == "/")
+		if (response->getPath() == "/" && response->_method != "GET")
 		{
 			error = 1;
 			response->setCode(Method_Not_Allowed);
 			totalResponse = responseErr(response);
 		}
-
 		else
 		{
+			if (response->getPath() == "/" && response->_method == "GET")
+				response->setPath(getRoot() + "/index.html");
 			if (checkAllowedMethods())
 				totalResponse = this->getHeader();
 			else if (this->_method == "GET")
@@ -84,9 +85,8 @@ int				Response::verifyMethod (int fd, Response *response, int requestEnd)
 				totalResponse += ERROR_HTML;
 		}
 	}
-
-	std::cout << YELLOW << "\n==========response=========\n" << totalResponse << RESET;
-
+	if (totalResponse != "")
+		std::cout << YELLOW << "#########response#########" << std::endl << totalResponse << RESET << std::endl;
 	int	writeSize = ::send(fd, totalResponse.c_str(), totalResponse.size(), 0);
 
 	if (error || writeSize == -1)
