@@ -197,8 +197,9 @@ int							compareURIsWithWildcard (std::string URI, std::string request, int mod
 	return (1);
 }
 
-unsigned int				hostToInt (std::string host)
+unsigned int				hostToInt (std::string& host)
 {
+	std::cout << "HOST TO INT" << std::endl;
 	size_t			sep = 0, start = 0;
 	unsigned int	n, ret = 0;
 	std::string		substr;

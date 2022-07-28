@@ -22,7 +22,6 @@ class RequestHeader : public EntityHeader
 		int				checkEssentialHeader ();
 
 		int				splitRequest (std::string request, int bodyCondition);
-
 		bool			hostToInt (std::string host);
 		
 		int				setListen (const std::string& strHost = "");

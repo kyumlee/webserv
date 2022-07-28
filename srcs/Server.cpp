@@ -32,9 +32,9 @@ void			Server::checkConnection(int request_fd)
 		this->disconnectRequest(request_fd);
 }
 
-int				Server::initListen(const std::string& host_port)
+int				Server::initListen(const std::string& hostPort)
 {
-	if (this->_response.setListen(host_port) == 1)
+	if (this->_response.setListen(hostPort) == 1)
 		return (printErr("init listen error"));
 
 	this->_listen.host = this->_response._listen.host;

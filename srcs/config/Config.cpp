@@ -138,6 +138,8 @@ int							Config::initServer (const std::string& confFile)
 	for (size_t i = 0; i < _serverBlock.size(); i++, it++)
 	{
 		for (size_t j = 0; j < _serverBlock[i].getAddresses().size(); j++, vec_i++) {
+			std::cout << "CHECK: " << std::endl;
+			std::cout << this->_serverVec[vec_i].initListen(this->_serverBlock[i].getAddresses()[j]) << std::endl;
 			// FIXME: std::out_of_range error!!!
 			//먼저 host와 port를 통해서 server의 listen을 초기화
 			if (this->_serverVec[vec_i].initListen(this->_serverBlock[i].getAddresses()[j]) == 1)

@@ -217,7 +217,7 @@ int				RequestHeader::splitRequest (std::string request, int bodyCondition)
 
 bool			RequestHeader::hostToInt(std::string host)
 {//string형인 host를 사용할 수 있도록 unsigned int형으로 바꿔준다.
-	size_t			sep = 0, start;
+	size_t			sep = 0, start = 0;
 	unsigned int	n, ret = 0;
 	std::string		substr;
 
@@ -231,13 +231,17 @@ bool			RequestHeader::hostToInt(std::string host)
 		return (0);
 	}
 
+	std::cout << 3 << std::endl;
 	for (int i = 3; i > -1; i--)
 	{
 		sep = host.find_first_of('.', sep);
+
 		if (i != 0 && sep == std::string::npos)
 			return (printErr("invalid host address (missing .)"));
+
 		if (i == 0)
 			sep = host.length();
+
 		substr = host.substr(start, sep - start);
 		if (isNumber(substr) == 0)
 			return (printErr("invalid host address (not number)"));
@@ -248,6 +252,7 @@ bool			RequestHeader::hostToInt(std::string host)
 		ret += n;
 		sep++; start = sep;
 	}
+
 	this->_listen.host = ret;
 	return (0);
 }

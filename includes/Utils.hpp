@@ -41,14 +41,14 @@
 # define DEFAULT_RETRY_AFTER		10
 
 # define ERROR_HTML 				"<!DOCTYPE html>\n\
-									<html lang=\"en\">\n\
-									\t<meta charset=\"utf-8\">\n\
-									\t<title>40404</title>\n\
-									<body>\n\
-									\t<h1>NO ERROR PAGE</h1>\n\
-									\t<p>configuration file has no error page that fits error code</p>\n\
-									</body>\n\
-									</html>\n"
+<html lang=\"en\">\n\
+\t<meta charset=\"utf-8\">\n\
+\t<title>40404</title>\n\
+<body>\n\
+\t<h1>NO ERROR PAGE</h1>\n\
+\t<p>configuration file has no error page that fits error code</p>\n\
+</body>\n\
+</html>\n"
 
 # define BAD_REQUEST_HTML			"../server/html/Bad_Request.html"
 # define FORBIDDEN_HTML				"../server/html/Forbidden.html"
@@ -135,7 +135,7 @@ std::string					parseValue (std::string line, size_t pos, std::string delimiter)
 int							strToInt (std::string str);
 int							compareURIsWithWildcard (std::string URI, std::string request, int mod);
 
-unsigned int				hostToInt (std::string host);
+unsigned int				hostToInt (std::string& host);
 //파일이 REG(regular file)이면 1을 리턴하고 다른 경우에는 0을 리턴한다.
 int							pathIsFile (const std::string& path);
 
