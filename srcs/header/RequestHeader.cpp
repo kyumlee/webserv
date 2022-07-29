@@ -21,7 +21,6 @@ int				RequestHeader::checkRequestLine (std::string requestLine)
 
 	this->_method = *requestLineIt++;
 	
-	//method가 대문자가 아니라면 바로 종료
 	if (isStrUpper(this->_method) == 0)
 		return (1);
 

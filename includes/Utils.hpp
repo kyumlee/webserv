@@ -133,7 +133,7 @@ std::pair<bool, size_t>		skipKey (std::string line, std::string str, std::string
 bool						isNumber (std::string str);
 std::string					parseValue (std::string line, size_t pos, std::string delimiter);
 int							strToInt (std::string str);
-int							compareURIsWithWildcard (std::string URI, std::string request, int mod);
+int							compareURIs (std::string URI, std::string request, int mod);
 
 unsigned int				hostToInt (std::string& host);
 //파일이 REG(regular file)이면 1을 리턴하고 다른 경우에는 0을 리턴한다.

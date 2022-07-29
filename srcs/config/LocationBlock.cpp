@@ -12,7 +12,7 @@ LocationBlock::LocationBlock ()
 	_index(),
 	_cgi(""),
 	_locations(),
-	_is_empty(true)
+	_isEmpty(true)
 {}
 
 LocationBlock::LocationBlock (std::string block)
@@ -27,7 +27,7 @@ LocationBlock::LocationBlock (std::string block)
 	_index(),
 	_cgi(""),
 	_locations(),
-	_is_empty(true)
+	_isEmpty(true)
 {}
 
 LocationBlock::LocationBlock (const LocationBlock &lb)
@@ -42,7 +42,7 @@ LocationBlock::LocationBlock (const LocationBlock &lb)
 	_index(lb._index),
 	_cgi(lb._cgi),
 	_locations(lb._locations),
-	_is_empty(lb._is_empty),
+	_isEmpty(lb._isEmpty),
 	_path(lb._path)
 {}
 
@@ -60,7 +60,7 @@ LocationBlock	&LocationBlock::operator= (const LocationBlock &lb) {
 	_index = lb._index;
 	_cgi = lb._cgi,
 	_locations = lb._locations;
-	_is_empty = lb._is_empty;
+	_isEmpty = lb._isEmpty;
 	_path = lb._path;
 
 	return (*this);
@@ -77,8 +77,9 @@ int							LocationBlock::getAutoindex () const { return (_autoindex); }
 std::vector<std::string>	LocationBlock::getIndex () const { return (_index); }
 std::string					LocationBlock::getCGI () const { return (_cgi); }
 std::vector<LocationBlock>	LocationBlock::getLocationBlocks () const { return (_locations); }
-bool						LocationBlock::getIsEmpty() const { return (this->_is_empty); }
 std::string					LocationBlock::getPath() const { return (this->_path); }
+
+bool						LocationBlock::empty() const { return (this->_isEmpty); }
 
 void						LocationBlock::setMod (int mod) { _mod = mod; }
 void						LocationBlock::setURI (std::string uri) { _uri = uri; }
@@ -235,12 +236,12 @@ int							LocationBlock::parse () {
 	parseIndex();
 	parseCGI();
 
-	this->_is_empty = 0;
+	this->_isEmpty = 0;
 
 	return (0);
 }
 
-void	LocationBlock::print_location_block()
+void	LocationBlock::printLocationBlock()
 {
 	std::cout << "location_block : " << this->_block << std::endl;
 	std::cout << "location block mode : " << this->_mod << std::endl;
@@ -264,7 +265,7 @@ void	LocationBlock::print_location_block()
 	else
 		std::cout << "location block has no index\n";
 	std::cout << "location block cgi : " << this->_cgi << std::endl;
-	std::cout << "location block is empty : " << this->_is_empty << std::endl;
+	std::cout << "location block is empty : " << this->_isEmpty << std::endl;
 	if (this->_locations.size() != 0)
 	{
 		std::cout << "location block's has location\n";
@@ -272,7 +273,7 @@ void	LocationBlock::print_location_block()
 		for (std::vector<LocationBlock>::iterator it = this->_locations.begin();
 			it != this->_locations.end(); it++)
 		{
-			(*it).print_location_block();
+			(*it).printLocationBlock();
 		}
 		std::cout << RESET;
 	}
