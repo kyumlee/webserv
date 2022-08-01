@@ -7,8 +7,8 @@
 class	Config {
 
 	private:
-		std::vector<ServerBlock>	_server_block;
-		std::vector<Server>			_server_vec;
+		std::vector<ServerBlock>	_serverBlock;
+		std::vector<Server>			_serverVec;
 
 	public:
 		Config ();
@@ -18,13 +18,13 @@ class	Config {
 
 		std::vector<ServerBlock>	getServerBlocks ();
 
-		void						addServerBlock (ServerBlock server_block);
+		void						addServerBlock (ServerBlock serverBlock);
 
 		int							parse (std::string file);
 
 		int							serverStart();
 
-		int							initServer(const std::string& conf_file);
+		int							initServer(const std::string& confFile);
 
 };
 

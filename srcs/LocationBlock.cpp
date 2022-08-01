@@ -1,4 +1,4 @@
-#include "./../../includes/LocationBlock.hpp"
+#include "./../includes/LocationBlock.hpp"
 
 LocationBlock::LocationBlock ()
 	: _block(),
@@ -61,7 +61,7 @@ LocationBlock	&LocationBlock::operator= (const LocationBlock &lb) {
 	_cgi = lb._cgi,
 	_locations = lb._locations;
 	
-	this->_is_empty = lb._is_empty;
+	_is_empty = lb._is_empty;
 	_path = lb._path;
 
 	return (*this);
@@ -78,8 +78,8 @@ int							LocationBlock::getAutoindex () const { return (_autoindex); }
 std::vector<std::string>	LocationBlock::getIndex () const { return (_index); }
 std::string					LocationBlock::getCGI () const { return (_cgi); }
 std::vector<LocationBlock>	LocationBlock::getLocationBlocks () const { return (_locations); }
-bool						LocationBlock::getIsEmpty() const { return (this->_is_empty); }
-std::string					LocationBlock::getPath() const { return (this->_path); }
+bool						LocationBlock::getIsEmpty() const { return (_is_empty); }
+std::string					LocationBlock::getPath() const { return (_path); }
 
 void						LocationBlock::setMod (int mod) { _mod = mod; }
 void						LocationBlock::setURI (std::string uri) { _uri = uri; }
@@ -131,7 +131,7 @@ int							LocationBlock::parseClntSize () {
 	if (res.first == false)
 		return (0);
 
-	clntSize = MiBToBits(parseValue(_block, res.second, ";"));
+	clntSize = strToInt(parseValue(_block, res.second, ";"));
 
 	if (clntSize < 0)
 		return (printErr("wrong client max body size (should be positive)"));
@@ -220,11 +220,11 @@ int							LocationBlock::parse () {
 		addLocationBlock(LocationBlock(locBlocks[i]));
 		_locations[i].parse();
 		
-		std::string	nest_location_uri = this->_locations[i].getURI();
+		std::string	nest_location_uri = _locations[i].getURI();
 		// if (nest_location_uri.at(0) == '/')
-		// 	this->_locations[i]._uri = this->_uri + nest_location_uri;
+		// 	_locations[i]._uri = _uri + nest_location_uri;
 		// else
-		// 	this->_locations[i]._uri = this->_uri + "/" + nest_location_uri;
+		// 	_locations[i]._uri = _uri + "/" + nest_location_uri;
 	}
 	
 	parseClntSize();
@@ -234,42 +234,42 @@ int							LocationBlock::parse () {
 	parseIndex();
 	parseCGI();
 
-	this->_is_empty = 0;
+	_is_empty = 0;
 
 	return (0);
 }
 
 void	LocationBlock::print_location_block()
 {
-	std::cout << "location_block : " << this->_block << std::endl;
-	std::cout << "location block mode : " << this->_mod << std::endl;
-	std::cout << "location block uri : " << this->_uri << std::endl;
-	std::cout << "location block clntsize : " << this->_clntSize << std::endl;
-	if (this->_methods.size() != 0)
+	std::cout << "location_block : " << _block << std::endl;
+	std::cout << "location block mode : " << _mod << std::endl;
+	std::cout << "location block uri : " << _uri << std::endl;
+	std::cout << "location block clntsize : " << _clntSize << std::endl;
+	if (_methods.size() != 0)
 	{
 		std::cout << "location block methods : ";
-		print_vec(this->_methods);
+		printVec(_methods);
 	}
 	else
 		std::cout << "location block has no methods\n";
-	std::cout << "location block redirect : " << this->_redirect << std::endl;
-	std::cout << "location block root : " << this->_root << std::endl;
-	std::cout << "location block autoindex : " << this->_autoindex << std::endl;
-	if (this->_index.size() != 0)
+	std::cout << "location block redirect : " << _redirect << std::endl;
+	std::cout << "location block root : " << _root << std::endl;
+	std::cout << "location block autoindex : " << _autoindex << std::endl;
+	if (_index.size() != 0)
 	{
 		std::cout << "location block index : ";
-		print_vec(this->_index);
+		printVec(_index);
 	}
 	else
 		std::cout << "location block has no index\n";
-	std::cout << "location block cgi : " << this->_cgi << std::endl;
-	std::cout << "location block is empty : " << this->_is_empty << std::endl;
-	if (this->_locations.size() != 0)
+	std::cout << "location block cgi : " << _cgi << std::endl;
+	std::cout << "location block is empty : " << _is_empty << std::endl;
+	if (_locations.size() != 0)
 	{
 		std::cout << "location block's has location\n";
 		std::cout << RED << "###########location block############\n";
-		for (std::vector<LocationBlock>::iterator it = this->_locations.begin();
-			it != this->_locations.end(); it++)
+		for (std::vector<LocationBlock>::iterator it = _locations.begin();
+			it != _locations.end(); it++)
 		{
 			(*it).print_location_block();
 		}

@@ -173,41 +173,6 @@ int							compareURIs (std::string URI, std::string request, int mod) {
 	return (1);
 }
 
-/*unsigned int	host_to_int(std::string host)
-{
-	size_t	sep = 0;
-	unsigned int	n;
-	size_t	start = 0;
-	std::string	substr;
-	unsigned int	ret = 0;
-	if (host == "localhost")
-		host = "127.0.0.1";
-	for (int i = 3; i > -1; i--)
-	{
-		sep = host.find_first_of('.', sep);
-		if (i != 0 && sep == std::string::npos)
-		{
-			std::cerr << "host address has not .\n";
-			return (0);
-		}
-		if (i == 0)
-			sep = host.length();
-		substr = host.substr(start, sep - start);
-		// std::cout << "substr : " << substr << ", sep : " << sep << ", start : " << start << std::endl;
-		if (isNumber(substr) == 0)
-		{
-			std::cerr << "host address is not number\n";
-			return (0);
-		}
-		n = std::atoi(substr.c_str());
-		for (int j = 0; j < i; j++)
-			n *= 256;
-		ret += n;
-		sep++; start = sep;
-	}
-	return (ret);
-}*/
-
 //파일이 REG(regular file)이면 1을 리턴하고 다른 경우에는 0을 리턴한다.
 int							pathIsFile(const std::string& path)
 {
@@ -241,7 +206,7 @@ std::string					setHtml(const std::string& path, const std::string& lang,
 	DIR*	dir = opendir(path.c_str());
 	if (dir == NULL)
 	{
-		std::cerr << "Error: could not open " << path << std::endl;
+		printErr("failed to open " + path);
 		//dir을 열지 못했을 때 어떤 값을 리턴할 지 생각하자
 		return "";
 	}
@@ -258,13 +223,13 @@ std::string					setHtml(const std::string& path, const std::string& lang,
 	"\t\t<h1>" + h1 + "</h1>\n";
 	struct dirent*	dirList;
 	while ((dirList = readdir(dir)) != NULL)
-		html += set_uri(std::string(dirList->d_name), dirName, host, port);
+		html += setUri(std::string(dirList->d_name), dirName, host, port);
 	html += "\t</body>\n</html>";
 	closedir(dir);
 	return (html);
 }
 
-int							set_error_page(const std::string& errPages, std::map<int, std::string>* errMap)
+int							setErrorPage(const std::string& errPages, std::map<int, std::string>* errMap)
 {
 	std::vector<std::string>	err = split(errPages, ' ');
 	//errPages를 공백으로 나눈 것을 저장
@@ -288,23 +253,23 @@ int							set_error_page(const std::string& errPages, std::map<int, std::string>
 	return (0);
 }
 
-void						print_vec(std::vector<std::string> str_vec)
+void						printVec(std::vector<std::string> strVec)
 {
-	for (std::vector<std::string>::iterator it = str_vec.begin();
-		it != str_vec.end(); it++)
+	for (std::vector<std::string>::iterator it = strVec.begin();
+		it != strVec.end(); it++)
 		std::cout << *it << ", ";
 	std::cout << std::endl;
 }
 
-void						print_set(std::set<std::string> str_set)
+void						printSet(std::set<std::string> strSet)
 {
-	for (std::set<std::string>::iterator it = str_set.begin();
-		it != str_set.end(); it++)
+	for (std::set<std::string>::iterator it = strSet.begin();
+		it != strSet.end(); it++)
 		std::cout << *it << ", ";
 	std::cout << std::endl;
 }
 
-void						print_errmap(std::map<int, std::string> errmap)
+void						printErrmap(std::map<int, std::string> errmap)
 {
 	std::cout << "==================err map==================\n";
 	for (std::map<int, std::string>::iterator it = errmap.begin();
@@ -316,93 +281,93 @@ void						print_errmap(std::map<int, std::string> errmap)
 }
 
 //s1의 끝부분에 s2가 있다면 0을 리턴, s2가 없다면 1을 리턴
-int							compare_end(const std::string& s1, const std::string& s2)
+int							compareEnd(const std::string& s1, const std::string& s2)
 {
-	size_t	s1_end = s1.size();
-	size_t	s2_end = s2.size();
-	while (s2_end > 0)
+	size_t	s1End = s1.size();
+	size_t	s2End = s2.size();
+	while (s2End > 0)
 	{
-		s1_end--; s2_end--;
-		if (s1_end < 0 || s1[s1_end] != s2[s2_end])
+		s1End--; s2End--;
+		if (s1End < 0 || s1[s1End] != s2[s2End])
 			return (1);
 	}
 	return (0);
 }
 
-std::string					find_extension(std::string& file)
+std::string					findExtension(std::string& file)
 {//file의 확장자를 찾는다.
-	size_t	extension_start = file.find_last_of('.');
-	if (extension_start == std::string::npos)
+	size_t	extensionStart = file.find_last_of('.');
+	if (extensionStart == std::string::npos)
 		return ("");
-	std::string	extension = file.substr(extension_start + 1, file.length() - extension_start - 1);
+	std::string	extension = file.substr(extensionStart + 1, file.length() - extensionStart - 1);
 	return (extension);
 }
 
 //슬래쉬의 맨 뒤쪽으로 가서 파일 이름을 찾고, 슬래쉬가 없다면 그대로 path를 반환
-std::string					find_file_name(const std::string& path)
+std::string					findFileName(const std::string& path)
 {
-	size_t	file_name_start = path.find_last_of('/');
-	if (file_name_start == std::string::npos)
+	size_t	fileNameStart = path.find_last_of('/');
+	if (fileNameStart == std::string::npos)
 		return (path);
-	std::string	file_name = path.substr(file_name_start + 1, path.length() - file_name_start - 1);
-	return (file_name);
+	std::string	fileName = path.substr(fileNameStart + 1, path.length() - fileNameStart - 1);
+	return (fileName);
 }
 
-std::string					find_file_type(const std::string& file)
+std::string					findFileType(const std::string& file)
 {
 	if (file.length() == 1)
 		return ("");
-	size_t	file_type_start = file.find_first_of('.');
-	if (file_type_start == std::string::npos)
+	size_t	fileTypeStart = file.find_first_of('.');
+	if (fileTypeStart == std::string::npos)
 		return ("");
-	std::string	file_type = file.substr(file_type_start + 1, file.length() - file_type_start - 1);
-	return (file_type);
+	std::string	fileType = file.substr(fileTypeStart + 1, file.length() - fileTypeStart - 1);
+	return (fileType);
 }
 
-std::string					erase_file_type(const std::string& file)
+std::string					eraseFileType(const std::string& file)
 {
 	if (file.length() == 1)
 		return (file);
-	size_t	file_type_start = file.find_first_of('.');
-	if (file_type_start == std::string::npos)
+	size_t	fileTypeStart = file.find_first_of('.');
+	if (fileTypeStart == std::string::npos)
 		return (file);
-	std::string	pure_file_name = file.substr(0, file_type_start);
-	return (pure_file_name);
+	std::string	pureFileName = file.substr(0, fileTypeStart);
+	return (pureFileName);
 }
 
-std::string					find_header_value(const std::string& header)
+std::string					findHeaderValue(const std::string& header)
 {
-	size_t	colon_pos = header.find(":");
-	if (colon_pos == std::string::npos)
+	size_t	colonPos = header.find(":");
+	if (colonPos == std::string::npos)
 		return ("");
-	std::string	value = header.substr(colon_pos + 1, header.length() - colon_pos - 1);
-	value = str_trim_char(value);
+	std::string	value = header.substr(colonPos + 1, header.length() - colonPos - 1);
+	value = strTrimChar(value);
 	return (value);
 }
 
-std::string					str_trim_char(const std::string& str, char delete_char)
+std::string					strTrimChar(const std::string& str, char deleteChar)
 {
-	std::string	ret_str = str;
-	size_t		ret_start = 0;
-	size_t		ret_end = 0;
+	std::string	retStr = str;
+	size_t		retStart = 0;
+	size_t		retEnd = 0;
 
-	if ((ret_start = ret_str.find_first_not_of(delete_char)) != std::string::npos)
-		ret_str = ret_str.substr(ret_start, ret_str.length() - ret_start);
+	if ((retStart = retStr.find_first_not_of(deleteChar)) != std::string::npos)
+		retStr = retStr.substr(retStart, retStr.length() - retStart);
 	else
 		return ("");
-	if ((ret_end = ret_str.find_last_not_of(delete_char)) != std::string::npos)
-		ret_str = ret_str.substr(0, ret_end + 1);
-	return (ret_str);
+	if ((retEnd = retStr.find_last_not_of(deleteChar)) != std::string::npos)
+		retStr = retStr.substr(0, retEnd + 1);
+	return (retStr);
 }
 
-std::string					str_delete_rn(const std::string& str)
+std::string					strDeleteRN(const std::string& str)
 {
-	std::string	ret_str(str);
-	size_t		r_pos = 0;
+	std::string	retStr(str);
+	size_t		rPos = 0;
 
-	if ((r_pos = ret_str.find("\r\n")) != std::string::npos)
-		ret_str = ret_str.substr(0, r_pos);
-	return (ret_str);
+	if ((rPos = retStr.find("\r\n")) != std::string::npos)
+		retStr = retStr.substr(0, rPos);
+	return (retStr);
 }
 
 int							isStrAlpha(const std::string& str)
@@ -425,41 +390,41 @@ int							isStrUpper(const std::string& str)
 	return (1);
 }
 
-int							make_html(const std::string& html_name, int code, const std::string& code_str, const std::string& server_name)
+int							makeHtml(const std::string& htmlName, int code, const std::string& codeStr, const std::string& serverName)
 {
-	std::ofstream	html_file;
-	std::string		file_content;
+	std::ofstream	htmlFile;
+	std::string		fileContent;
 
-	html_file.open(html_name);
-	if (html_file.is_open() == false)
+	htmlFile.open(htmlName);
+	if (htmlFile.is_open() == false)
 	{
-		std::cerr << "HTML FILE MAKE ERROR\n";
+		printErr("failed to make html");
 		return (Internal_Server_Error);
 	}
-	file_content += "<html>\n"
-	"<head><title>" + intToStr(code) + " " + code_str + "</title></head>\n"
-	"<body>\n<center><h1>" + intToStr(code) + " " + code_str + "</h1></center>\n"
-	"<hr><center>" + server_name + "</center>\n"
+	fileContent += "<html>\n"
+	"<head><title>" + intToStr(code) + " " + codeStr + "</title></head>\n"
+	"<body>\n<center><h1>" + intToStr(code) + " " + codeStr + "</h1></center>\n"
+	"<hr><center>" + serverName + "</center>\n"
 	"</body>\n"
 	"</html>";
-	html_file << file_content;
-	html_file.close();
+	htmlFile << fileContent;
+	htmlFile.close();
 	return (0);
 }
 
 size_t						calExponent(const std::string& str)
 {
-	size_t	e_pos = str.find("e");
-	std::string	num_str;
-	std::string	exponent_str;
+	size_t	ePos = str.find("e");
+	std::string	numStr;
+	std::string	exponentStr;
 	size_t		num;
 	size_t		exponent;
-	if (e_pos != std::string::npos)
+	if (ePos != std::string::npos)
 	{
-		num_str = str.substr(0, e_pos);
-		exponent_str = str.substr(e_pos + 1, str.length() - e_pos - 1);
-		num = std::atoi(num_str.c_str());
-		exponent = std::atoi(exponent_str.c_str());
+		numStr = str.substr(0, ePos);
+		exponentStr = str.substr(ePos + 1, str.length() - ePos - 1);
+		num = std::atoi(numStr.c_str());
+		exponent = std::atoi(exponentStr.c_str());
 		return (num * powl(10, exponent));
 	}
 	else
@@ -485,14 +450,14 @@ size_t						hexToDecimal(std::string& hex)
 {
 	// std::string	hex_str = "0123456789abcdef";
 	size_t	ret = 0;
-	std::string::iterator	hex_it = hex.begin();
+	std::string::iterator	hexIt = hex.begin();
 	if (checkHex(hex) == 0)
 		return (0);
-	while (*hex_it == '0')
-		hex_it++;
-	for (; hex_it != hex.end(); hex_it++)
+	while (*hexIt == '0')
+		hexIt++;
+	for (; hexIt != hex.end(); hexIt++)
 	{
-		size_t	num = *hex_it;
+		size_t	num = *hexIt;
 		if (num >= 'a' && num <= 'f')
 			num = num - 'a' + 10;
 		else if (num >= '0' && num <= '9')

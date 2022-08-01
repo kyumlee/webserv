@@ -2,10 +2,17 @@ NAME			= webserv
 CPP				= c++
 CPPFLAGS		= -Wall -Wextra -Werror -std=c++98
 SRCS			= ./main.cpp \
-				  ./srcs/Utils.cpp \
-				  ./srcs/config/Config.cpp \
-				  ./srcs/config/LocationBlock.cpp \
-				  ./srcs/config/ServerBlock.cpp
+				  ./srcs/Cgi.cpp \
+				  ./srcs/Config.cpp \
+				  ./srcs/EntityHeader.cpp \
+				  ./srcs/GeneralHeader.cpp \
+				  ./srcs/LocationBlock.cpp \
+				  ./srcs/RequestHeader.cpp \
+				  ./srcs/Response.cpp \
+				  ./srcs/ResponseHeader.cpp \
+				  ./srcs/Server.cpp \
+				  ./srcs/ServerBlock.cpp \
+				  ./srcs/Utils.cpp
 OBJS			= $(SRCS:.cpp=.o)
 RM				= rm -f
 

@@ -1,4 +1,4 @@
-#include "./../../includes/ServerBlock.hpp"
+#include "./../includes/ServerBlock.hpp"
 
 ServerBlock::ServerBlock ()
 	: _block(""),
@@ -268,7 +268,7 @@ void	ServerBlock::print_server_block()
 	if (this->_errPages.size() != 0)
 	{
 		std::cout << "serverblock errorpages\n";
-		print_errmap(this->_errPages);
+		printErrmap(this->_errPages);
 	}
 	else
 		std::cout << "serverblock has no errorpages\n";
@@ -290,7 +290,7 @@ void	ServerBlock::print_server_block()
 	if (this->_methods.size() != 0)
 	{
 		std::cout << "serverblock has methods\n";
-		print_vec(this->_methods);
+		printVec(this->_methods);
 	}
 	else
 		std::cout << "serverblock has no methods\n";
@@ -298,7 +298,7 @@ void	ServerBlock::print_server_block()
 	if (this->_index.size() != 0)
 	{
 		std::cout << "serverblock has index\n";
-		print_vec(this->_index);
+		printVec(this->_index);
 	}
 	else
 		std::cout << "serverblock has no index\n";
