@@ -132,38 +132,38 @@ int							Config::initServer(const std::string& conf)
 			//먼저 host와 port를 통해서 server의 listen을 초기화
 			if (_serverVec[v].initListen(_serverBlock[i].getAddresses()[j]) == 1)
 			{
-				printErr("failed to listen: " + _serverBlock[i].getAddresses()[j]);
+//				printErr("failed to listen: " + _serverBlock[i].getAddresses()[j]);
 				_serverVec.erase(it);
 				continue ;
 			}
 
 			_serverVec[v]._response.setServer(_serverBlock[i].getName());
-			std::cout << "server name : " << _serverVec[v]._response._server << std::endl;
+//			std::cout << "server name : " << _serverVec[v]._response._server << std::endl;
 
 			_serverVec[v]._response.initAllowedMethods(_serverBlock[i].getMethods());
-			std::cout << "allow method : ";
+//			std::cout << "allow method : ";
 			for (std::set<std::string>::iterator it = _serverVec[v]._response._allowedMethods.begin(); it != _serverVec[v]._response._allowedMethods.end(); it++)
 				std::cout << *it << ", ";
 			std::cout << std::endl;
 
 			_serverVec[v]._response._root = _serverBlock[i].getRoot();
-			std::cout << "server root : " << _serverVec[v]._response._root << std::endl;
+//			std::cout << "server root : " << _serverVec[v]._response._root << std::endl;
 
 			if (_serverBlock[i].getErrPages().empty() == 1)
 				_serverVec[v]._response.initErrorHtml();
 			else
 				_serverVec[v]._response.setErrorHtml(_serverBlock[i].getErrPages());
-			printErrmap(_serverVec[v]._response._errorHtml);
+//			printErrmap(_serverVec[v]._response._errorHtml);
 
 			_serverVec[v]._clientMaxBodySize = _serverBlock[i].getClntSize();
-			std::cout << "client max body size : " << _serverVec[v]._clientMaxBodySize << std::endl;
+//			std::cout << "client max body size : " << _serverVec[v]._clientMaxBodySize << std::endl;
 
 			_serverVec[v]._autoindex = _serverBlock[i].getAutoindex();
-			std::cout << "auto index : " << (_serverVec[v]._autoindex == true ? "true" : "false") << std::endl;
+//			std::cout << "auto index : " << (_serverVec[v]._autoindex == true ? "true" : "false") << std::endl;
 
 			_serverVec[v]._index = _serverBlock[i].getIndex();
-			std::cout << "index : ";
-			printVec(_serverVec[v]._index);
+//			std::cout << "index : ";
+//			printVec(_serverVec[v]._index);
 
 			for (size_t location_num = 0; location_num < _serverBlock[i].getLocationBlocks().size(); location_num++)
 				_serverVec[v]._locations.push_back(_serverBlock[i].getLocationBlocks()[location_num]);
