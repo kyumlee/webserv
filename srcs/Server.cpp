@@ -352,13 +352,15 @@ void			Server::eventRead(int fd)
 
 	if (fd == _serverSocket)
 		requestAccept();
+
 	else if (_request.find(fd) != _request.end())
 	{
 		char	buf[READ_BUFFER_SIZE] = {};
 		int		n;
 
+		// read as much as content-length
 		if (_response._contentLength != "" && _bodyCondition == Body_Start)
-		{//저장해놓은 contentLength만큼만 받도록 한다.
+		{
 			if (_response._bodySize >= _clientMaxBodySize)
 			{
 				printErr("content length is too big to receive");
@@ -366,6 +368,7 @@ void			Server::eventRead(int fd)
 				return ;
 			}
 		}
+		// TODO: READ_BUFFER_SIZE -> max_body_size or content-length?
 		n = ::recv(fd, buf, READ_BUFFER_SIZE - 1, 0);
 		buf[n] = '\0';
 		_request[fd] += buf;
@@ -477,8 +480,7 @@ void			Server::eventRead(int fd)
 		}
 
 		//check header
-		if ((_bodyCondition == Body_Start || _bodyCondition == Body_End)
-			&& _bodyEnd == 0)
+		if ((_bodyCondition == Body_Start || _bodyCondition == Body_End) && _bodyEnd == 0)
 		{
 			if (checkRequestLine == 1 || checkRequestLine == 9)
 				;
@@ -491,8 +493,7 @@ void			Server::eventRead(int fd)
 		}
 
 		//body size만큼 입력 받았을 때
-		if (_response._bodySize != 0 && _response._contentLength != ""
-			&& _request[fd].length() - _bodyStartPos >= _response._bodySize)
+		if (_response._bodySize != 0 && _response._contentLength != "" && _request[fd].length() - _bodyStartPos >= _response._bodySize)
 		{
 			_requestEnd = 1;
 			_request[fd] = _request[fd].substr(0, _bodyStartPos + _response._bodySize);
@@ -508,23 +509,21 @@ void			Server::eventRead(int fd)
 				size_t	bodySize = _request[fd].find("\r\n", _rnPos + 3);
 
 				std::cout << "rn pos: " << _rnPos << ", body start pos: " << _bodyStartPos << std::endl;
-				// std::cout << "!!!!!!!!!!request!!!!!!!" << _request[fd].substr(0, _rnPos) << std::endl;
 				if (bodySize != std::string::npos && _bodyVecSize == 0)
 				{
-					std::string	bodySize_str = _request[fd].substr(_rnPos, bodySize - _rnPos);
+					std::string	bodySizeStr = _request[fd].substr(_rnPos, bodySize - _rnPos);
 
-					if (bodySize_str.find("e") != std::string::npos)
-						_bodyVecSize = calExponent(bodySize_str);
-
+					if (bodySizeStr.find("e") != std::string::npos)
+						_bodyVecSize = calExponent(bodySizeStr);
 					else
-						_bodyVecSize = std::atoi(bodySize_str.c_str());
+						_bodyVecSize = std::atoi(bodySizeStr.c_str());
 
 					_bodyVecStartPos = bodySize + 2;
 					_rnPos = _bodyVecStartPos + _bodyVecSize;
 
 					std::cout << GREEN << "body vec size: " << _bodyVecSize << std::endl;
-					std::cout << "body size: " << bodySize_str.length() << RESET << std::endl;
-					// std::cout << "bodySize_str: " << bodySize_str << RESET << std::endl;
+					std::cout << "body size: " << bodySizeStr.length() << RESET << std::endl;
+					// std::cout << "bodySizeStr: " << bodySizeStr << RESET << std::endl;
 					if (_bodyVecSize == 0)
 						_response.setCode(Bad_Request);
 				}

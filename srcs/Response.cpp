@@ -41,9 +41,7 @@ int			Response::verifyMethod (int fd, Response *response, int requestEnd)
 {//요청마다 header를 만들어야 하고 에러가 발생했을 때에 errormap을 적절히 불러와야 한다.
 	//request의 method를 확인한다.
 	std::string	totalResponse;
-	int			error = 0;
-
-	int			code = response->_code;
+	int			error = 0, code = response->_code;
 
 	if (code == Bad_Request || code == Internal_Server_Error || code == Payload_Too_Large)
 	{

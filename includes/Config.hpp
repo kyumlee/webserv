@@ -16,15 +16,15 @@ class	Config {
 		~Config ();
 		Config						&operator= (Config &conf);
 
-		std::vector<ServerBlock>	getServerBlocks ();
+		std::vector<ServerBlock>	getServerBlocks () const;
 
 		void						addServerBlock (ServerBlock serverBlock);
 
 		int							parse (std::string file);
 
-		int							serverStart();
+		int							startServer ();
 
-		int							initServer(const std::string& confFile);
+		int							initServer (const std::string& conf);
 
 };
 

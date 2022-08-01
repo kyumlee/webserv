@@ -24,7 +24,7 @@
 # include <cctype> //isalpha
 # include <cmath>
 
-# define DEFAULT_CONF		"./conf/default.conf"
+# define DEFAULT_CONF		"./../conf/mac2.conf"
 # define NONE				0
 # define EXACT				1
 # define PREFERENTIAL		2
@@ -48,13 +48,13 @@
 	</body>\n\
 	</html>\n"
 
-# define BAD_REQUEST_HTML			"../files/html/Bad_Request.html"
-# define FORBIDDEN_HTML				"../files/html/Forbidden.html"
-# define NOT_ALLOWED_HTML			"../files/html/Not_Allowed.html"
-# define NOT_FOUND_HTML				"../files/html/Not_found.html"
-# define PAYLOAD_TOO_LARGE_HTML		"../files/html/Payload_Too_Large.html"
-# define INTERNAL_SERVER_ERROR_HTML	"../files/html/Internal_Server_Error.html"
-# define DEFAULT_HTML				"../files/html/index.html"
+# define BAD_REQUEST_HTML			"./files/html/Bad_Request.html"
+# define FORBIDDEN_HTML				"./files/html/Forbidden.html"
+# define NOT_ALLOWED_HTML			"./files/html/Not_Allowed.html"
+# define NOT_FOUND_HTML				"./files/html/Not_Found.html"
+# define PAYLOAD_TOO_LARGE_HTML		"./files/html/Payload_Too_Large.html"
+# define INTERNAL_SERVER_ERROR_HTML	"./files/html/Internal_Server_Error.html"
+# define DEFAULT_HTML				"./files/html/index.html"
 
 # define RED	"\e[31m"
 # define GREEN	"\e[32m"
@@ -158,9 +158,7 @@ std::string					findHeaderValue (const std::string& header);
 std::string					strDeleteRN (const std::string& str);
 
 int							isStrAlpha (const std::string& str);
-//str이 알파벳으로 이루어져 있다면 1을 리턴, 아니면 0을 리턴
 int							isStrUpper (const std::string& str);
-//str이 대문자 알파벳으로 이루어져 있다면 1을 리턴, 아니면 0을 리턴
 
 int							makeHtml (const std::string& htmlName, int code, const std::string& codeStr, const std::string& serverName);
 

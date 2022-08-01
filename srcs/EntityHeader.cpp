@@ -15,11 +15,10 @@ void					EntityHeader::setContentLength (const std::string& path, const std::str
 		_contentLength = contentLength;
 	else if (path != "")
 	{
-		struct stat fileStat;
+		struct stat	fileStat;
+
 		if (!stat(path.c_str(), &fileStat))
-		{
 			_contentLength = intToStr(fileStat.st_size);
-		}
 		else
 		{
 			printErr("failed to get size");

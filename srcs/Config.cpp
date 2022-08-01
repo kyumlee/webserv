@@ -6,7 +6,7 @@ Config::~Config () {}
 
 Config						&Config::operator= (Config &conf) { _serverBlock = conf._serverBlock; return (*this); }
 
-std::vector<ServerBlock>	Config::getServerBlocks () { return (_serverBlock); }
+std::vector<ServerBlock>	Config::getServerBlocks () const { return (_serverBlock); }
 
 void						Config::addServerBlock (ServerBlock serverBlock) { _serverBlock.push_back(serverBlock); }
 
@@ -35,10 +35,9 @@ int							Config::parse (std::string conf) {
 	return (0);
 }
 
-int	Config::serverStart()
+int	Config::startServer ()
 {
-	for (std::vector<Server>::iterator it = _serverVec.begin();
-		it < _serverVec.end(); it++)
+	for (std::vector<Server>::iterator it = _serverVec.begin(); it < _serverVec.end(); it++)
 	{
 		if ((*it).initServerSocket() == 1)
 		{
@@ -58,7 +57,9 @@ int	Config::serverStart()
 
 		newEventsVec.push_back(newEvents);
 		currEventVec.push_back(&currEvent);
+
 		(*it).initServerMember();
+
 		std::cout << YELLOW << "host : " << (*it)._listen.host << ", port : " << (*it)._listen.port;
 		std::cout << " server start!!!!!!\n" << RESET;
 	}
@@ -142,9 +143,9 @@ int							Config::initServer(const std::string& conf)
 
 			_serverVec[v]._response.initAllowedMethods(_serverBlock[i].getMethods());
 //			std::cout << "allow method : ";
-			for (std::set<std::string>::iterator it = _serverVec[v]._response._allowedMethods.begin(); it != _serverVec[v]._response._allowedMethods.end(); it++)
-				std::cout << *it << ", ";
-			std::cout << std::endl;
+//			for (std::set<std::string>::iterator it = _serverVec[v]._response._allowedMethods.begin(); it != _serverVec[v]._response._allowedMethods.end(); it++)
+//				std::cout << *it << ", ";
+//			std::cout << std::endl;
 
 			_serverVec[v]._response._root = _serverBlock[i].getRoot();
 //			std::cout << "server root : " << _serverVec[v]._response._root << std::endl;
@@ -165,12 +166,12 @@ int							Config::initServer(const std::string& conf)
 //			std::cout << "index : ";
 //			printVec(_serverVec[v]._index);
 
-			for (size_t location_num = 0; location_num < _serverBlock[i].getLocationBlocks().size(); location_num++)
-				_serverVec[v]._locations.push_back(_serverBlock[i].getLocationBlocks()[location_num]);
+			for (size_t l = 0; l < _serverBlock[i].getLocationBlocks().size(); l++)
+				_serverVec[v]._locations.push_back(_serverBlock[i].getLocationBlocks()[l]);
 		}
 	}
 
-	serverStart();
+	startServer();
 
 	return (0);
 }
