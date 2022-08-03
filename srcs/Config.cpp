@@ -142,9 +142,9 @@ int							Config::initServer(const std::string& conf)
 			_serverVec[v].setResponseRoot(_serverBlock[i].getRoot());
 
 			if (_serverBlock[i].getErrPages().empty() == 1)
-				_serverVec[v].initServerErrPages();
+				_serverVec[v].initServerErrorPages();
 			else
-				_serverVec[v].setServerErrPages(_serverBlock[i].getErrPages());
+				_serverVec[v].setServerErrorPages(_serverBlock[i].getErrPages());
 
 			_serverVec[v]._serverRoot = _serverBlock[i].getRoot();
 			_serverVec[v]._clientMaxBodySize = _serverBlock[i].getClntSize();

@@ -17,7 +17,7 @@ class	ServerBlock {
 		int							_autoindex;
 		std::vector<std::string>	_index;
 
-		std::string					_host_port;
+		std::string					_hostPort;
 
 	public:
 		// constructor, destructor, assignment operator overload
@@ -53,7 +53,7 @@ class	ServerBlock {
 		void						setAutoindex (int autoindex);
 		void						setIndex (std::vector<std::string> index);
 
-		void						setHostPort(std::string host_port);
+		void						setHostPort(std::string hostPort);
 
 		// parse
 		int							parseAddresses ();
@@ -70,7 +70,7 @@ class	ServerBlock {
 		std::vector<LocationBlock>	findMatchingLocationBlocks (std::string requestURI) const;
 		LocationBlock				selectLocationBlock (std::string requestURI) const;
 
-		void	print_server_block();
+		void						printServerBlock ();
 };
 
 # endif

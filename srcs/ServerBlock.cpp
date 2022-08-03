@@ -37,7 +37,7 @@ ServerBlock::ServerBlock (const ServerBlock &srv)
 	_methods(srv._methods),
 	_autoindex(srv._autoindex),
 	_index(srv._index),
-	_host_port(srv._host_port)
+	_hostPort(srv._hostPort)
 {}
 
 ServerBlock::~ServerBlock () {}
@@ -68,7 +68,7 @@ std::vector<std::string>	ServerBlock::getMethods () const { return (_methods); }
 int							ServerBlock::getAutoindex () const { return (_autoindex); }
 std::vector<std::string>	ServerBlock::getIndex () const { return (_index); }
 
-std::string					ServerBlock::getHostPort () const { return (this->_host_port); }
+std::string					ServerBlock::getHostPort () const { return (_hostPort); }
 
 void						ServerBlock::setBlock (std::string block) { _block = block; }
 void						ServerBlock::setAddresses (std::vector<std::string> addr) { _addresses = addr; }
@@ -81,7 +81,7 @@ void						ServerBlock::setMethods (std::vector<std::string> methods) { _methods 
 void						ServerBlock::setAutoindex (int autoindex) { _autoindex = autoindex; }
 void						ServerBlock::setIndex (std::vector<std::string> index) { _index = index; }
 
-void						ServerBlock::setHostPort(std::string host_port) { this->_host_port = host_port; }
+void						ServerBlock::setHostPort(std::string hostPort) { _hostPort = hostPort; }
 
 int							ServerBlock::parseAddresses () {
 	std::vector<std::string>	addresses;
@@ -141,12 +141,12 @@ int							ServerBlock::parseErrPages () {
 		}
 		else
 		{
-			this->_errPages[strToInt(*it)] = "";
+			_errPages[strToInt(*it)] = "";
 		}
 	}
 
-	for (std::map<int, std::string>::iterator it = this->_errPages.begin();
-		it != this->_errPages.end(); it++)
+	for (std::map<int, std::string>::iterator it = _errPages.begin();
+		it != _errPages.end(); it++)
 		it->second = errPages;
 
 	return (0);
@@ -252,53 +252,53 @@ int							ServerBlock::parse () {
 		_locations[i].parse();
 		if (_locations[i].getRoot() == ".")
 			_locations[i].setRoot(getRoot());
-		// this->_locations[i].setURI(this->_root + this->_locations[i].getURI());
+		// _locations[i].setURI(_root + _locations[i].getURI());
 	}
 
 	return (0);
 }
 
-void	ServerBlock::print_server_block()
+void	ServerBlock::printServerBlock()
 {
 	std::cout << "serveraddresses : ";
 	for (size_t i = 0; i < _addresses.size(); i++)
 		std::cout << _addresses[i] << ",";
 	std::cout << std::endl;
-	std::cout << "serverblock name : " << this->_name << std::endl;
-	if (this->_errPages.size() != 0)
+	std::cout << "serverblock name : " << _name << std::endl;
+	if (_errPages.size() != 0)
 	{
 		std::cout << "serverblock errorpages\n";
-		printErrmap(this->_errPages);
+		printErrmap(_errPages);
 	}
 	else
 		std::cout << "serverblock has no errorpages\n";
-	std::cout << "serverblock clntsize : " << this->_clntSize << std::endl;
-	std::cout << "root : " << this->_root << std::endl;
-	if (this->_locations.size() != 0)
+	std::cout << "serverblock clntsize : " << _clntSize << std::endl;
+	std::cout << "root : " << _root << std::endl;
+	if (_locations.size() != 0)
 	{
 		std::cout << GREEN << "serverblock has location block\n";
-		for (std::vector<LocationBlock>::iterator it = this->_locations.begin();
-			it != this->_locations.end(); it++)
+		for (std::vector<LocationBlock>::iterator it = _locations.begin();
+			it != _locations.end(); it++)
 		{
 			std::cout << GREEN;
-			(*it).print_location_block();
+			(*it).printLocationBlock();
 		}
 		std::cout << RESET;
 	}
 	else
 		std::cout << "serverblock has no location block\n";
-	if (this->_methods.size() != 0)
+	if (_methods.size() != 0)
 	{
 		std::cout << "serverblock has methods\n";
-		printVec(this->_methods);
+		printVec(_methods);
 	}
 	else
 		std::cout << "serverblock has no methods\n";
-	std::cout << "serverblock autoindex : " << this->_autoindex << std::endl;
-	if (this->_index.size() != 0)
+	std::cout << "serverblock autoindex : " << _autoindex << std::endl;
+	if (_index.size() != 0)
 	{
 		std::cout << "serverblock has index\n";
-		printVec(this->_index);
+		printVec(_index);
 	}
 	else
 		std::cout << "serverblock has no index\n";

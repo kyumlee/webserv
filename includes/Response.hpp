@@ -22,7 +22,7 @@ class Response : public ResponseHeader
 		std::string	getTotalResponse () const;
 		size_t		getSendStartPos () const;
 
-		void		initResponseValue () const;
+		void		initResponseValue ();
 
 		int			checkAllowedMethods ();
 

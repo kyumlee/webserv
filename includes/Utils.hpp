@@ -141,7 +141,7 @@ std::string					setHtml (const std::string& path, const std::string& lang, const
 int							setErrorPages (const std::string& errPages, std::map<int, std::string>* errMap);
 
 std::string					intToStr (int code);
-std::string					sizetToStr (int code);
+std::string					sizetToStr (size_t code);
 
 void						printVec (std::vector<std::string> strVec);
 void						printSet (std::set<std::string> strSet);
@@ -168,19 +168,6 @@ size_t						calExponent (const std::string& str);
 int							checkHex (std::string& hex);
 size_t						hexToDecimal (std::string& hex);
 
-void						printStr (const std::string& str, const std::string& response)
-{
-	if (response == "response")
-		std::cout << YELLOW << "============response============" << std::endl << RESET;
-	else if (response == "request")
-		std::cout << GREEN << "============request============" << std::endl << RESET;
-
-	if (str.length() > 200)
-		std::cout << str.substr(0, 150) << "..." << str.substr(str.length() - 20, 20) << std::endl;
-	else
-		std::cout << str << std::endl;
-
-	std::cout << "total size: " << str.length() << std::endl;
-}
+void						printStr (const std::string& str, const std::string& response);
 
 #endif

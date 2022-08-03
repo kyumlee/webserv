@@ -30,8 +30,9 @@ void						ResponseHeader::setErrorHtml (std::map<int, std::string> html)
 	changeHtmlRelativePath();
 }
 
+//errorHtml에 저장되어있는 파일이름을 상대경로로 바꿔준다.
 void						ResponseHeader::changeHtmlRelativePath ()
-{//errorHtml에 저장되어있는 파일이름을 상대경로로 바꿔준다.
+{
 	for (std::map<int, std::string>::iterator it = _errorHtml.begin(); it != _errorHtml.end(); it++)
 	{
 		if (it->second == "400.html")
@@ -51,10 +52,10 @@ void						ResponseHeader::changeHtmlRelativePath ()
 	}
 }
 
-
-void						ResponseHeader::initErrorMap ()
-{//errormap은 config파일에서 읽은 그대로 사용해야 한다.
+//errormap은 config파일에서 읽은 그대로 사용해야 한다.
 //일단 내 맘대로 초기화했다.
+void						ResponseHeader::initErrorMap ()
+{
 	_errorMap[Continue] = "Continue";
 	_errorMap[OK] = "OK";
 	_errorMap[Created] = "Created";
@@ -127,7 +128,7 @@ std::string					ResponseHeader::getStatusMessage (int code)
 	if (_errorMap.find(code) != _errorMap.end())
 		return (_errorMap[code]);
 
-	return ("There is no error code");
+	return ("error code not found");
 }
 
 void						ResponseHeader::initRequest ()

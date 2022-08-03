@@ -16,7 +16,7 @@ size_t		Response::getTotalSendSize () const { return (_totalSendSize); }
 std::string	Response::getTotalResponse () const { return (_totalResponse); }
 size_t		Response::getSendStartPos () const { return (_sendStartPos); }
 
-void		Response::initResponseValue () const { _remainSend = false; }
+void		Response::initResponseValue () { _remainSend = false; }
 
 int			Response::checkAllowedMethods ()
 {
