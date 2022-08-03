@@ -45,9 +45,9 @@ class Server
 		//changeList에 temp event를 추가한다.
 		void			changeEvents (std::vector<struct kevent>& changeList, uintptr_t ident, int16_t filter, uint16_t flags, uint32_t fflags, intptr_t data, void* udata);
 
-		void			disconnectRequest (int request_fd);
+		void			disconnectRequest (int fd);
 
-		void			checkConnection (int request_fd);
+		void			checkConnection (int fd);
 
 		int				initListen (const std::string& host_port);
 

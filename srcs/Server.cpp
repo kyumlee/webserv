@@ -368,7 +368,6 @@ void			Server::eventRead(int fd)
 				return ;
 			}
 		}
-		// TODO: READ_BUFFER_SIZE -> max_body_size or content-length?
 		n = ::recv(fd, buf, READ_BUFFER_SIZE - 1, 0);
 		buf[n] = '\0';
 		_request[fd] += buf;
