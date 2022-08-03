@@ -3,8 +3,9 @@
 
 # include "./EntityHeader.hpp"
 
+//HTTP요청에서 사용되지만 메시지의 컨텐츠와 관련이 없는 패치될 리소스나 클라리언트 자체에 대한 자세한 정보를 포함하는 헤더
 class RequestHeader : public EntityHeader
-{//HTTP요청에서 사용되지만 메시지의 컨텐츠와 관련이 없는 패치될 리소스나 클라리언트 자체에 대한 자세한 정보를 포함하는 헤더
+{
 	public:
 		RequestHeader ();
 		RequestHeader (const RequestHeader& rh);
@@ -14,7 +15,7 @@ class RequestHeader : public EntityHeader
 
 		int				checkRequestLine (std::string requestLine);
 		int				checkHeader (std::vector<std::string> header);
-		int				checkHeaderAvailable (const std::string& header, char colon = ':', char space = ' ');
+		int				checkAvailableHeader (const std::string& header, char colon = ':', char space = ' ');
 		int				checkEssentialHeader ();
 
 		int				splitRequest (std::string request, int bodyCondition);
@@ -76,6 +77,7 @@ class RequestHeader : public EntityHeader
 		size_t						_bodySize;
 		std::string					_root;
 		std::vector<std::string>	_bodyVec;
+		std::string					_xHeader;
 
 		/*
 		//사용안할 것 같은 것

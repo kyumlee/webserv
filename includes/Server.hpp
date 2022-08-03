@@ -1,7 +1,8 @@
 #ifndef __SERVER_HPP__
 # define __SERVER_HPP__
 
-# include "./Cgi.hpp"
+//# include "./Cgi.hpp"
+# include "./Response.hpp"
 
 class Server
 {

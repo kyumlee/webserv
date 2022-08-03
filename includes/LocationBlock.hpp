@@ -18,7 +18,7 @@ class	LocationBlock {
 		std::string					_cgi;
 		std::vector<LocationBlock>	_locations;
 
-		bool						_is_empty;
+		bool						_empty;
 		std::string					_path;
 
 	public:
@@ -41,8 +41,9 @@ class	LocationBlock {
 		std::vector<std::string>	getIndex () const;
 		std::string					getCGI () const;
 		std::vector<LocationBlock>	getLocationBlocks () const;
-		bool						getIsEmpty() const;
 		std::string					getPath() const;
+
+		bool						empty() const;
 
 		// setter
 		void						setMod (int mod);
@@ -55,7 +56,7 @@ class	LocationBlock {
 		void						setIndex (std::vector<std::string> index);
 		void						setCGI (std::string cgi);
 		void						addLocationBlock (LocationBlock lc);
-		void						setIsEmpty(bool is_empty);
+		void						setEmpty(bool empty);
 		void						setPath(const std::string& path);
 
 		// parse
@@ -69,7 +70,7 @@ class	LocationBlock {
 
 		int							parse ();
 
-		void						print_location_block();
+		void						printLocationBlock();
 };
 
 #endif

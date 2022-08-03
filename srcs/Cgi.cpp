@@ -7,22 +7,27 @@ Cgi::~Cgi () {}
 Cgi&								Cgi::operator= (Cgi const& cgi) { (void)cgi; return (*this); }
 
 void								Cgi::setEnv (const std::string& env_key, const std::string& env_value) { _env[env_key] = env_value; }
-void								Cgi::setCgiExist (const int& exist) { _is_exist = exist; }
-int									Cgi::getCgiExist () const { return (_is_exist); }
+void								Cgi::setCgiExist (const int& exist) { _exists = exist; }
+void								Cgi::setName (const std::string& name) { _name = name; }
+void								Cgi::setBody (const std::string& body) { _body = body; }
+
 std::map<std::string, std::string>	Cgi::getEnv () const { return (_env); }
+int									Cgi::getCgiExist () const { return (_exists); }
+std::string							Cgi::getName () const { return (_name); }
+std::string							Cgi::getBody () const { return (_body); }
 
 // 인자로 받은 script를 실행하고 script결과를 리턴한다.
-std::string							Cgi::exectueCgi (const std::string& scriptName)
+std::string							Cgi::executeCgi (const std::string& scriptName)
 {
 	pid_t		pid;
-	int			saveStdin;
-	int			saveStdout;
+	int			saveStdin, saveStdout;
 	char**		env;
 	std::string	newBody;
 
+	//new가 실패하면 bad_alloc을 thorw한다.
 	try {
 		env = envToChar();
-	} catch(std::bad_alloc& e) {//new가 실패하면 bad_alloc을 thorw한다.
+	} catch(std::bad_alloc& e) {
 		printErr(e.what());
 	}
 
@@ -47,19 +52,26 @@ std::string							Cgi::exectueCgi (const std::string& scriptName)
 		printErr("failed to fork");
 		return ("Status: 500\r\n\r\n");
 	}
+	//자식 프로세스일 때
 	else if (pid == 0)
-	{//자식 프로세스일 때
+	{
 		char* const*	nll = NULL;
-		//입력받는 값이 fdIn으로 들어가도록 만든다..
+
+		std::cout << PINK << "cgi start" << std::endl << RESET;
+
+		//입력받는 값이 fdIn으로 들어가도록 만든다.
 		dup2(fdIn, STDIN_FILENO);
 		//출력되는 값이 fdOut으로 들어가도록 만든다.
 		dup2(fdOut, STDOUT_FILENO);
+
 		execve(scriptName.c_str(), nll, env);
+
 		printErr("failed to execve");
 		write(STDOUT_FILENO, "Status: 500\r\n\r\n", 15);
 	}
+	//부모 프로세스일 때
 	else
-	{//부모 프로세스일 때
+	{
 		char	buffer[CGI_BUFFER_SIZE] = {0};
 		//임의의 자식 프로세스를 기다린다.
 		waitpid(-1, NULL, 0);
@@ -78,8 +90,10 @@ std::string							Cgi::exectueCgi (const std::string& scriptName)
 	//stdin과 stdout을 원래대로 복구한다.
 	dup2(saveStdin, STDIN_FILENO);
 	dup2(saveStdout, STDOUT_FILENO);
+
 	fclose(fIn);
 	fclose(fOut);
+
 	close(fdIn);
 	close(fdOut);
 	close(saveStdin);
@@ -89,15 +103,19 @@ std::string							Cgi::exectueCgi (const std::string& scriptName)
 		delete[] env[i];
 	delete[] env;
 
-	if (pid == 0)
 	//자식 프로세스가 제대로 execve를 실행하지 못했을 때 exit으로 프로그램 종료
+	if (pid == 0)
+	{
+		printErr("stop server due to cgi error");
 		exit(0);
+	}
 	return (newBody);
 }
 
-void								Cgi::print_env()
+void								Cgi::printEnv()
 {//제대로 env가 들어갔는지 확인하려고 만든 함수 나중에 필요없을 거다.
 	char**	env = envToChar();
+
 	for (size_t i = 0; i < _env.size(); i++)
 		std::cout << env[i] << std::endl;
 }

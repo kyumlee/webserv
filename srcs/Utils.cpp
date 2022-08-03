@@ -135,6 +135,14 @@ std::string					intToStr (int code)
 	return (ret.str());
 }
 
+std::string					sizetToStr (size_t code)
+{
+	std::stringstream	ret;
+	ret << code;
+
+	return (ret.str());
+}
+
 int							compareURIs (std::string URI, std::string request, int mod) {
 	size_t		pos = URI.find('/', URI.find('/', 0) + 1) + 1;
 	char		start;

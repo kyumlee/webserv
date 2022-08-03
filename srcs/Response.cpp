@@ -6,92 +6,154 @@ Response::~Response () {}
 
 Response&	Response::operator= (const Response& response) { (void)response; return (*this); }
 
+void		Response::setRemainSend (int value) { _remainSend = value; }
+void		Response::setTotalSendSize (size_t size) { _totalSendSize = size; }
+void		Response::setTotalResponse (const std::string& response) { _totalResponse = response; }
+void		Response::setSendStartPos (const size_t& startPos) { _sendStartPos = startPos; }
+
+int			Response::getRemainSend () const { return (_remainSend); }
+size_t		Response::getTotalSendSize () const { return (_totalSendSize); }
+std::string	Response::getTotalResponse () const { return (_totalResponse); }
+size_t		Response::getSendStartPos () const { return (_sendStartPos); }
+
+void		Response::initResponseValue () const { _remainSend = false; }
+
 int			Response::checkAllowedMethods ()
 {
-	if (_possibleMethods.find(_method) != _possibleMethods.end()
-		&& _allowedMethods.find(_method) == _allowedMethods.end())
-	{//method를 알고는 있지만, allow가 되지 않았을 때
+	//method를 알고는 있지만, allow가 되지 않았을 때
+	if (_possibleMethods.find(_method) != _possibleMethods.end() && _allowedMethods.find(_method) == _allowedMethods.end())
+	{
 		_code = Method_Not_Allowed;
 		return (1);
 	}
+	//method가 뭔지 모를 때
 	if (_possibleMethods.find(_method) == _possibleMethods.end())
-	{//method가 뭔지 모를 때
+	{
 		_code = Method_Not_Allowed;
 		return (1);
 	}
+
 	return (0);
 }
 
-std::string	Response::responseErr (Response *response)
+std::string	Response::responseErr ()
 {
-	int	code = response->_code;
+	if (_errorHtml.find(_code) != _errorHtml.end())
+		setPath(_errorHtml[_code]);
 
-	if (response->_errorHtml.find(code) != response->_errorHtml.end())
-		response->_path = response->_errorHtml[code];
+	std::string	header = getHeader();
+	std::map<int, std::string>::iterator	it = _errorHtml.find(_code);
 
-	std::string	header = response->getHeader();
-	std::map<int, std::string>::iterator	it = response->_errorHtml.find(code);
-	if (it != response->_errorHtml.end())
-		header += response->readHtml(it->second);
+	if (it != _errorHtml.end())
+		header += readHtml(it->second);
 
 	return (header);
 }
 
-int			Response::verifyMethod (int fd, Response *response, int requestEnd)
-{//요청마다 header를 만들어야 하고 에러가 발생했을 때에 errormap을 적절히 불러와야 한다.
-	//request의 method를 확인한다.
-	std::string	totalResponse;
-	int			error = 0, code = response->_code;
+//요청마다 header를 만들어야 하고 에러가 발생했을 때에 errormap을 적절히 불러와야 한다.
+//request의 method를 확인한다.
+int			Response::verifyMethod (int fd, int requestEnd, Cgi& cgi)
+{
+	int			error = 0, ret = 0;
 
-	if (code == Bad_Request || code == Internal_Server_Error || code == Payload_Too_Large)
+	if (_code == Bad_Request || _code == Internal_Server_Error || _code == Payload_Too_Large)
 	{
 		error = 1;
-		totalResponse = responseErr(response);
+		_totalResponse = responseErr();
 	}
 
-	if (requestEnd)
+	else
 	{
-		if (response->getPath() == "/" && response->_method != "GET")
+		if (requestEnd)
 		{
-			error = 1;
-			response->setCode(Method_Not_Allowed);
-			totalResponse = responseErr(response);
-		}
-		else
-		{
-			if (response->getPath() == "/" && response->_method == "GET")
-				response->setPath(getRoot() + "/index.html");
-			if (checkAllowedMethods() == 1)
-				totalResponse = getHeader();
-			else if (_method == "GET")
-				totalResponse = execGET(_path, fd);
-			else if (_method == "HEAD")
-				totalResponse = execHEAD(_path, fd);
-			else if (_method == "POST")
-				totalResponse = execPOST(_path, fd, _body);
-			else if (_method == "PUT")
-				totalResponse = execPUT(_path, fd, _body);
-			else if (_method == "DELETE")
-				totalResponse = execDELETE(_path, fd);
+			if (getPath() == "/" && _method != "GET")
+			{
+				error = 1;
+				setCode(Method_Not_Allowed);
+				_totalResponse = responseErr();
 
-			std::map<int, std::string>::iterator	it = _errorHtml.find(_code);
-			if (it != _errorHtml.end())
-				totalResponse += readHtml(it->second);
-			else if (_code != Created && _code != No_Content && _code != OK)
-				totalResponse += ERROR_HTML;
+				std::cout << PINK << "response path: " << _path << RESET << std::endl;
+				std::cout << BLUE << "total response size: " << _totalResponse.length() << RESET << std::endl;
+
+				ret = 2;
+			}
+			else
+			{
+				if (getPath() == "/" && _method == "GET")
+					setPath(getRoot() + "/index.html");
+				if (checkAllowedMethods() == 1)
+					_totalResponse = getHeader();
+				else if (_method == "GET")
+					_totalResponse = execGET(_path, fd);
+				else if (_method == "HEAD")
+					_totalResponse = execHEAD(_path, fd);
+				else if (_method == "POST")
+					_totalResponse = execPOST(_path, fd, _body, cgi);
+				else if (_method == "PUT")
+					_totalResponse = execPUT(_path, fd, _body);
+				else if (_method == "DELETE")
+					_totalResponse = execDELETE(_path, fd);
+
+				std::map<int, std::string>::iterator	it = _errorHtml.find(_code);
+				if (it != _errorHtml.end())
+					_totalResponse += readHtml(it->second);
+				else if (_code != Created && _code != No_Content && _code != OK)
+					_totalResponse += ERROR_HTML;
+			}
 		}
 	}
-	if (totalResponse != "")
-		std::cout << YELLOW << "#########response########\n" << totalResponse <<  RESET << std::endl;
-	int	writeSize = ::send(fd, totalResponse.c_str(), totalResponse.size(), 0);
-	if (error || writeSize == -1)
+
+	std::string	sendMsg;
+	int			writeSize;
+	if (_totalResponse.length() - _sendStartPos >= CGI_BUFFER_SIZE)
 	{
-		if (!error)
+		sendMsg = _totalResponse.substr(_sendStartPos, CGI_BUFFER_SIZE);
+		writeSize = ::send(fd, sendMsg.c_str(), CGI_BUFFER_SIZE, 0);
+		if (error || writeSize == -1)
+		{
+			if (!error || writeSize == -1)
+				printErr("::send()");
+			_totalResponse.clear();
+			return (1);
+		}
+		_sendStartPos += writeSize;
+		_totalSendSize += writeSize;
+		_remainSend = true;
+	}
+	else if (_remainSend == true)
+	{
+		sendMsg = _totalResponse.substr(_sendStartPos, _totalResponse.length() - _sendStartPos);
+		std::cout << YELLOW << "#######request[" << fd << "] !!!!!" << std::endl;
+		std::cout << _totalResponse.substr(0, 100) << " ... " << _totalResponse.substr(_totalResponse.length() - 20, 20) << std::endl;
+		std::cout << "total response size: " << _totalResponse.size() << ", sendMsg size: " << sendMsg.size() << RESET << std::endl;
+		writeSize = ::send(fd, sendMsg.c_str(), sendMsg.length(), 0);
+		if (writeSize == -1)
+		{
+			_totalResponse.clear();
 			return (printErr("::send()"));
-		return (1);
+		}
+		std::cout << RED << "#######response[" << fd << "] send!!!!!" << std::endl << RESET;
+		_totalSendSize += writeSize;
+		std::cout << PINK << "send start pos: " << _sendStartPos << ", total send size: " << _totalSendSize << RESET << std::endl;
+		_sendStartPos = 0;
+		_totalSendSize = 0;
+		_remainSend = false;
+		_totalResponse.clear();
+	}
+	else
+	{
+		writeSize = ::send(fd, _totalResponse.c_str(), _totalResponse.size(), 0);
+		if (error || writeSize == -1)
+		{
+			if (!error)
+				printErr("::send()");
+			_totalResponse.clear();
+			return (1);
+		}
+		_totalResponse.clear();
 	}
 	
-	return (0);
+	return (ret);
 }
 
 std::string	Response::execGET (std::string& path, int fd)
@@ -99,11 +161,16 @@ std::string	Response::execGET (std::string& path, int fd)
 	std::string			fileContent = "";
 	std::ifstream		file;
 	std::stringstream	buffer;
+
 	(void)fd;
-	std::cout << "GET METHOD PATH IS " << path << std::endl;
+	if (path == "YoupiBanane")
+		path = "YoupiBanane/index.html";
+	if (compareEnd(path, "nop") == 0)
+		path = "YoupiBanane/nop/youpi.bad_extension";
+
 	if (compareEnd(path, "Yeah") == 0)
 	{
-		std::cout << "path is Yeah so not found\n";
+		printErr("Yeah not found");
 		setCode(Not_Found);
 	}
 	else
@@ -111,7 +178,7 @@ std::string	Response::execGET (std::string& path, int fd)
 		file.open(path.c_str(), std::ifstream::in);
 		if (file.is_open() == false)
 		{
-			std::cout << "FILE OPEN ERROR\n";
+			printErr("failed to open");
 			setCode(Not_Found);
 		}
 		else
@@ -124,6 +191,7 @@ std::string	Response::execGET (std::string& path, int fd)
 	fileContent = getHeader();
 	fileContent += buffer.str();
 	file.close();
+
 	return (fileContent);
 }
 
@@ -134,37 +202,67 @@ std::string	Response::execHEAD (std::string& path, int fd)
 	return (fileContent);
 }
 
-std::string	Response::execPOST (const std::string& path, int fd, const std::string& body)
+std::string	Response::execPOST (const std::string& path, int fd, const std::string& body, Cgi& cgi)
 {
-	(void)fd;
 	std::ofstream	file;
 	std::string		fileContent;
-	if (pathIsFile(path))
+
+	(void)fd;
+	if (cgi.getCgiExist() == true && getRemainSend() == false)
 	{
-		std::cout << "post file is already exist, so add the content\n";
-		file.open(path.c_str(), std::ofstream::out | std::ofstream::app);
-		if (file.is_open() == false)
+		fileContent = cgi.executeCgi(cgi.getName());
+
+		std::string	tmpHttp = "HTTP/1.1";
+		fileContent.erase(0, 7);
+		fileContent.insert(0, tmpHttp);
+
+		if (fileContent.find("\r\n") != std::string::npos)
 		{
-			printErr("failed to open file");
-			setCode(Forbidden);
+			size_t	insertPos = fileContent.find("\r\n") + 2;
+			fileContent.insert(insertPos, "Content-Length: " + _contentLength + "\r\n");
 		}
-		file << body;
-		file.close();
-		setCode(No_Content);
+		if (fileContent.find("Content-Type:") != std::string::npos)
+		{
+			setHeader();
+			size_t	insertPos = fileContent.find("Content-Type:");
+			insertPos = fileContent.find("\r\n", insertPos) + 2;
+			fileContent.insert(insertPos, "Date: " + _date + "\r\nLast-Modified: " + _lastModified + "\r\nServer: " + _server + "\r\nTransfer-Encoding: identity\r\n");
+		}
+		setCode(OK);
+		_contentType = "text/html";
 	}
-	else
+
+	// TODO
+	else if (cgi.getCgiExist() == false)
 	{
-		file.open(path.c_str(), std::ofstream::out);
-		if (file.is_open() == false)
+		if (pathIsFile(path))
 		{
-			printErr("failed to open file");
-			setCode(Not_Found);
+			std::cout << "file already exists" << std::endl;
+			file.open(path.c_str(), std::ofstream::out | std::ofstream::app);
+			if (file.is_open() == false)
+			{
+				printErr("failed to open file");
+				setCode(Forbidden);
+			}
+			file << body;
+			file.close();
+			setCode(No_Content);
 		}
-		file << body;
-		file.close();
-		setCode(Created);
+		else
+		{
+			file.open(path.c_str(), std::ofstream::out);
+			if (file.is_open() == false)
+			{
+				printErr("failed to open file");
+				setCode(Not_Found);
+			}
+			file << body;
+			file.close();
+			setCode(Created);
+		}
+		fileContent = getHeader();
 	}
-	fileContent = getHeader();
+
 	return (fileContent);
 }
 
@@ -175,9 +273,11 @@ std::string	Response::execPUT (const std::string& path, int fd, std::string& bod
 	(void)fd;
 	std::ofstream	file;
 	std::string		fileContent;
+
+	//file이 이미 존재하고 regular file일 때 파일을 갱신한다.
 	if (pathIsFile(path))
-	{//file이 이미 존재하고 regular file일 때 파일을 갱신한다.
-		std::cout << "put file is already exist\n";
+	{
+		std::cout << "file already exists" << std::endl;
 		file.open(path.c_str());
 		if (file.is_open() == false)
 		{
@@ -189,8 +289,9 @@ std::string	Response::execPUT (const std::string& path, int fd, std::string& bod
 		file << body;
 		file.close();
 	}
+	//file이 존재하지 않거나, file이 regular file이 아닐 때 작동
 	else
-	{//file이 존재하지 않거나, file이 regular file이 아닐 때 작동
+	{
 		file.open(path.c_str());
 		if (file.is_open() == false)
 		{

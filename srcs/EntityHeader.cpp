@@ -7,7 +7,7 @@ EntityHeader::~EntityHeader() {}
 EntityHeader&			EntityHeader::operator= (const EntityHeader& eh) { (void)eh; return (*this); }
 
 void					EntityHeader::setContentLength (const size_t& size)
-{ _contentLength = intToStr(size); }
+{ _contentLength = sizetToStr(size); }
 
 void					EntityHeader::setContentLength (const std::string& path, const std::string& contentLength)
 {

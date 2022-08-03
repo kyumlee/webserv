@@ -4,7 +4,7 @@ LocationBlock::LocationBlock ()
 	: _block(),
 	_mod(NONE),
 	_uri(),
-	_clntSize(READ_BUFFER_SIZE),
+	_clntSize(0),
 	_methods(),
 	_redirect(),
 	_root("."),
@@ -12,14 +12,14 @@ LocationBlock::LocationBlock ()
 	_index(),
 	_cgi(""),
 	_locations(),
-	_is_empty(true)
+	_empty(true)
 {}
 
 LocationBlock::LocationBlock (std::string block)
 	: _block(block),
 	_mod(NONE),
 	_uri(),
-	_clntSize(READ_BUFFER_SIZE),
+	_clntSize(0),
 	_methods(),
 	_redirect(),
 	_root("."),
@@ -27,7 +27,7 @@ LocationBlock::LocationBlock (std::string block)
 	_index(),
 	_cgi(""),
 	_locations(),
-	_is_empty(true)
+	_empty(true)
 {}
 
 LocationBlock::LocationBlock (const LocationBlock &lb)
@@ -42,13 +42,14 @@ LocationBlock::LocationBlock (const LocationBlock &lb)
 	_index(lb._index),
 	_cgi(lb._cgi),
 	_locations(lb._locations),
-	_is_empty(lb._is_empty),
+	_empty(lb._empty),
 	_path(lb._path)
 {}
 
 LocationBlock::~LocationBlock() {}
 
-LocationBlock	&LocationBlock::operator= (const LocationBlock &lb) {
+LocationBlock	&LocationBlock::operator= (const LocationBlock &lb)
+{
 	_block = lb._block;
 	_mod = lb._mod;
 	_uri = lb._uri;
@@ -61,7 +62,7 @@ LocationBlock	&LocationBlock::operator= (const LocationBlock &lb) {
 	_cgi = lb._cgi,
 	_locations = lb._locations;
 	
-	_is_empty = lb._is_empty;
+	_empty = lb._empty;
 	_path = lb._path;
 
 	return (*this);
@@ -78,7 +79,7 @@ int							LocationBlock::getAutoindex () const { return (_autoindex); }
 std::vector<std::string>	LocationBlock::getIndex () const { return (_index); }
 std::string					LocationBlock::getCGI () const { return (_cgi); }
 std::vector<LocationBlock>	LocationBlock::getLocationBlocks () const { return (_locations); }
-bool						LocationBlock::getIsEmpty() const { return (_is_empty); }
+bool						LocationBlock::empty() const { return (_empty); }
 std::string					LocationBlock::getPath() const { return (_path); }
 
 void						LocationBlock::setMod (int mod) { _mod = mod; }
@@ -91,9 +92,11 @@ void						LocationBlock::setAutoindex (int autoindex) { _autoindex = autoindex; 
 void						LocationBlock::setIndex (std::vector<std::string> index) { _index = index; }
 void						LocationBlock::setCGI (std::string cgi) { _cgi = cgi; }
 void						LocationBlock::addLocationBlock (LocationBlock lc) { _locations.push_back(lc); }
+void						LocationBlock::setEmpty (bool empty) { _empty = empty; }
 void						LocationBlock::setPath(const std::string& path) { _path = path; }
 
-int							LocationBlock::parseModMatch () {
+int							LocationBlock::parseModMatch ()
+{
 	size_t	pos = 0, bracketPos = _block.find("{", 0);
 	size_t	end = _block.find("\n", 0);
 
@@ -102,11 +105,13 @@ int							LocationBlock::parseModMatch () {
 
 	if (_block[pos] == '/')
 		setMod(NONE);
-	else if (_block[pos] == '=') {
+	else if (_block[pos] == '=')
+	{
 		setMod(EXACT);
 		pos++;
 	}
-	else if (_block[pos] == '^' && _block[pos] == '~') {
+	else if (_block[pos] == '^' && _block[pos] == '~')
+	{
 		setMod(PREFERENTIAL);
 		pos += 2;
 	}
@@ -119,19 +124,23 @@ int							LocationBlock::parseModMatch () {
 	setURI(_block.substr(pos, bracketPos - 1 - pos));
 	if (_uri != "/" && _uri.at(0) == '/')
 		_uri = _uri.substr(1, _uri.length() - 1);
+
 	std::cout << GREEN << "location block uri: " << getURI() << RESET << std::endl;
 
 	return (0);
 }
 
-int							LocationBlock::parseClntSize () {
+int							LocationBlock::parseClntSize ()
+{
 	std::pair<bool, size_t>	res = skipKey(_block, "client_max_body_size", ";");
 	int						clntSize;
 
 	if (res.first == false)
 		return (0);
 
-	clntSize = strToInt(parseValue(_block, res.second, ";"));
+	// XXX
+	clntSize = std::atoi(parseValue(_block, res.second, ";").c_str());
+//	clntSize = strToInt(parseValue(_block, res.second, ";"));
 
 	if (clntSize < 0)
 		return (printErr("wrong client max body size (should be positive)"));
@@ -141,7 +150,8 @@ int							LocationBlock::parseClntSize () {
 	return (0);
 }
 
-int							LocationBlock::parseMethods () {
+int							LocationBlock::parseMethods ()
+{
 	std::string				methods;
 	std::pair<bool, size_t>	res = skipKey(_block, "allow_methods", ";");
 
@@ -154,7 +164,8 @@ int							LocationBlock::parseMethods () {
 	if (_methods.empty())
 		return (0);
 
-	for (size_t i = 0; i < _methods.size(); i++) {
+	for (size_t i = 0; i < _methods.size(); i++)
+	{
 		if (_methods[i] != "GET" && _methods[i] != "POST" && _methods[i] != "DELETE"  && _methods[i] != "PUT" && _methods[i] != "HEAD")
 			return (printErr("invalid method"));
 	}
@@ -162,7 +173,8 @@ int							LocationBlock::parseMethods () {
 	return (0);
 }
 
-int							LocationBlock::parseRoot () {
+int							LocationBlock::parseRoot ()
+{
 	std::pair<bool, size_t>	res = skipKey(_block, "root", ";");
 
 	if (res.first == false)
@@ -173,7 +185,8 @@ int							LocationBlock::parseRoot () {
 	return (0);
 }
 
-int							LocationBlock::parseAutoindex () {
+int							LocationBlock::parseAutoindex ()
+{
 	std::string				is;
 	std::pair<bool, size_t>	res = skipKey(_block, "autoindex", ";");
 
@@ -188,7 +201,8 @@ int							LocationBlock::parseAutoindex () {
 	return (0);
 }
 
-int							LocationBlock::parseIndex () {
+int							LocationBlock::parseIndex ()
+{
 	std::string				index;
 	std::pair<bool, size_t>	res = skipKey(_block, "index", ";");
 
@@ -201,7 +215,8 @@ int							LocationBlock::parseIndex () {
 	return (0);
 }
 
-int							LocationBlock::parseCGI () {
+int							LocationBlock::parseCGI ()
+{
 	std::pair<bool, size_t>	res = skipKey(_block, "cgi_pass", ";");
 
 	if (res.first == false)
@@ -212,21 +227,11 @@ int							LocationBlock::parseCGI () {
 	return (0);
 }
 
-int							LocationBlock::parse () {
+int							LocationBlock::parse ()
+{
 	std::vector<std::string>	locBlocks = splitBlocks(_block, "location ");
 
 	parseModMatch();
-	for (size_t i = 0; i < locBlocks.size(); i++) {
-		addLocationBlock(LocationBlock(locBlocks[i]));
-		_locations[i].parse();
-		
-		std::string	nest_location_uri = _locations[i].getURI();
-		// if (nest_location_uri.at(0) == '/')
-		// 	_locations[i]._uri = _uri + nest_location_uri;
-		// else
-		// 	_locations[i]._uri = _uri + "/" + nest_location_uri;
-	}
-	
 	parseClntSize();
 	parseMethods();
 	parseRoot();
@@ -234,12 +239,20 @@ int							LocationBlock::parse () {
 	parseIndex();
 	parseCGI();
 
-	_is_empty = 0;
+	setEmpty(false);
+
+	for (size_t i = 0; i < locBlocks.size(); i++)
+	{
+		addLocationBlock(locBlocks[i]);
+		_locations[i].parse();
+		if (_locations[i].getRoot() == ".")
+			_locations[i].setRoot(getRoot());
+	}
 
 	return (0);
 }
 
-void	LocationBlock::print_location_block()
+void	LocationBlock::printLocationBlock ()
 {
 	std::cout << "location_block : " << _block << std::endl;
 	std::cout << "location block mode : " << _mod << std::endl;
@@ -251,7 +264,7 @@ void	LocationBlock::print_location_block()
 		printVec(_methods);
 	}
 	else
-		std::cout << "location block has no methods\n";
+		std::cout << "location block has no methods" << std::endl;
 	std::cout << "location block redirect : " << _redirect << std::endl;
 	std::cout << "location block root : " << _root << std::endl;
 	std::cout << "location block autoindex : " << _autoindex << std::endl;
@@ -261,20 +274,17 @@ void	LocationBlock::print_location_block()
 		printVec(_index);
 	}
 	else
-		std::cout << "location block has no index\n";
+		std::cout << "location block has no index" << std::endl;
 	std::cout << "location block cgi : " << _cgi << std::endl;
-	std::cout << "location block is empty : " << _is_empty << std::endl;
+	std::cout << "location block is empty : " << _empty << std::endl;
 	if (_locations.size() != 0)
 	{
-		std::cout << "location block's has location\n";
-		std::cout << RED << "###########location block############\n";
-		for (std::vector<LocationBlock>::iterator it = _locations.begin();
-			it != _locations.end(); it++)
-		{
-			(*it).print_location_block();
-		}
+		std::cout << "location block's has location" << std::endl;
+		std::cout << RED << "###########location block############" << std::endl;
+		for (std::vector<LocationBlock>::iterator it = _locations.begin(); it != _locations.end(); it++)
+			(*it).printLocationBlock();
 		std::cout << RESET;
 	}
 	else
-		std::cout << "location block has no location\n";
+		std::cout << "location block has no location" << std::endl;
 }
