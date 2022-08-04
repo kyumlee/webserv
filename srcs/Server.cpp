@@ -158,6 +158,7 @@ void						Server::setCgiEnv (int fd)
 
 void						Server::initCgiEnv (int fd)
 {
+	_cgi.setName(_configCgi);
 	_cgi.setEnv("REDIRECT_STATUS", "200");
 	_cgi.setEnv("CONTENT_LENGTH", _response[fd].getContentLength());
 	_cgi.setEnv("CONTENT_TYPE", _response[fd].getContentType());
@@ -199,8 +200,7 @@ LocationBlock				Server::selectLocationBlock (std::string requestURI, int fd)
 			{
 				std::string	changePath = "";
 				if (requestURI.at(requestURI.length() - 1) == '/')
-					// XXX
-					requestURI = requestURI.substr(0, requestURI.length() - 1);
+					requestURI.substr(0, requestURI.length() - 1);
 				size_t	firstSlashPos = requestURI.find_first_of("/");
 				if (firstSlashPos != std::string::npos)
 					changePath = requestURI.substr(firstSlashPos, requestURI.length() - firstSlashPos);
@@ -252,6 +252,7 @@ LocationBlock				Server::selectLocationBlock (std::string requestURI, int fd)
 			ret = i;
 		}
 	}
+
 //	std::cout << PINK << "ret: "<< ret << ", after select location path : " << locationBlocks[ret].getPath();
 //	std::cout << ", select location uri: " << locationBlocks[ret].getURI() << RESET << std::endl;
 
@@ -397,6 +398,7 @@ void						Server::eventRead(int fd)
 //				std::cout << PINK << "@@@@@@@@@@@@@select location@@@@@@@@@@@@" << RESET << std::endl;
 //				std::cout << "response root: " << _response[fd]._root << ", response path: " << _response[fd]._path << std::endl;
 				LocationBlock	test = selectLocationBlock(_response[fd]._path, fd);
+
 				if (test.empty() == false)
 				{
 					_response[fd].setPath(test.getPath());

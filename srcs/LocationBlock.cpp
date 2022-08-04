@@ -138,9 +138,7 @@ int							LocationBlock::parseClntSize ()
 	if (res.first == false)
 		return (0);
 
-	// XXX
 	clntSize = std::atoi(parseValue(_block, res.second, ";").c_str());
-//	clntSize = strToInt(parseValue(_block, res.second, ";"));
 
 	if (clntSize < 0)
 		return (printErr("wrong client max body size (should be positive)"));

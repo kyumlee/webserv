@@ -144,7 +144,8 @@ std::string					sizetToStr (size_t code)
 }
 
 int							compareURIs (std::string URI, std::string request, int mod) {
-	size_t		pos = URI.find('/', URI.find('/', 0) + 1) + 1;
+//	size_t		pos = URI.find('/', URI.find('/', 0) + 1) + 1;
+	size_t		pos = URI.find('/') + 1;
 	char		start;
 	std::string	temp;
 	std::string	temp2;
@@ -160,12 +161,13 @@ int							compareURIs (std::string URI, std::string request, int mod) {
 			if (temp.find(&request[1], 0) != std::string::npos)
 				return (0);
 		}
-
 		return (1);
 	}
 
 	start = URI[pos + 1];
 	temp = &URI[pos + 1];
+	if (request.find(start, 0) == std::string::npos)
+		return (1);
 	temp2 = request.substr(request.find(start, 0), request.length() - request.find(start, 0));
 
 	if (mod == EXACT) {

@@ -61,7 +61,6 @@ int			Response::verifyMethod (int fd, int requestEnd, Cgi& cgi)
 		error = 1;
 		_totalResponse = responseErr();
 	}
-
 	else
 	{
 		if (requestEnd)
@@ -77,12 +76,14 @@ int			Response::verifyMethod (int fd, int requestEnd, Cgi& cgi)
 
 				ret = 2;
 			}
-			else
+			else if (getRemainSend() == false)
 			{
 				if (getPath() == "/" && _method == "GET")
 					setPath(getRoot() + "/index.html");
 				if (checkAllowedMethods() == 1)
+				{
 					_totalResponse = getHeader();
+				}
 				else if (_method == "GET")
 					_totalResponse = execGET(_path, fd);
 				else if (_method == "HEAD")
@@ -204,12 +205,14 @@ std::string	Response::execHEAD (std::string& path, int fd)
 
 std::string	Response::execPOST (const std::string& path, int fd, const std::string& body, Cgi& cgi)
 {
+
 	std::ofstream	file;
 	std::string		fileContent;
 
 	(void)fd;
 	if (cgi.getCgiExist() == true && getRemainSend() == false)
 	{
+		std::cout << "CGI NAME: " << cgi.getName() << std::endl;
 		fileContent = cgi.executeCgi(cgi.getName());
 
 		std::string	tmpHttp = "HTTP/1.1";
@@ -232,7 +235,6 @@ std::string	Response::execPOST (const std::string& path, int fd, const std::stri
 		_contentType = "text/html";
 	}
 
-	// TODO
 	else if (cgi.getCgiExist() == false)
 	{
 		if (pathIsFile(path))

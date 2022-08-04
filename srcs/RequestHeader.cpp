@@ -148,7 +148,6 @@ int				RequestHeader::checkEssentialHeader ()
 		return (0);
 	if (_host == "")
 		return (printErr("host doesn't exist"));
-	std::cout << "host : " << _host << std::endl;
 
 	//Content-Type, Content-Length(or Transfer-Encoding)이 있어야 한다.
 	if (_method == "PUT" || _method == "POST")
