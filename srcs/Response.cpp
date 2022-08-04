@@ -39,7 +39,7 @@ int			Response::checkAllowedMethods ()
 std::string	Response::responseErr ()
 {
 	if (_errorHtml.find(_code) != _errorHtml.end())
-		setPath(_errorHtml[_code]);
+		_path = _errorHtml[_code];
 
 	std::string	header = getHeader();
 	std::map<int, std::string>::iterator	it = _errorHtml.find(_code);
@@ -60,6 +60,9 @@ int			Response::verifyMethod (int fd, int requestEnd, Cgi& cgi)
 	{
 		error = 1;
 		_totalResponse = responseErr();
+		std::cout << PINK << "response path: " << _path << RESET << std::endl;
+		std::cout << BLUE << "total response size: " << _totalResponse.length() << RESET << std::endl;
+		ret = 2;
 	}
 	else
 	{
@@ -70,20 +73,13 @@ int			Response::verifyMethod (int fd, int requestEnd, Cgi& cgi)
 				error = 1;
 				setCode(Method_Not_Allowed);
 				_totalResponse = responseErr();
-
-				std::cout << PINK << "response path: " << _path << RESET << std::endl;
-				std::cout << BLUE << "total response size: " << _totalResponse.length() << RESET << std::endl;
-
-				ret = 2;
 			}
 			else if (getRemainSend() == false)
 			{
 				if (getPath() == "/" && _method == "GET")
 					setPath(getRoot() + "/index.html");
 				if (checkAllowedMethods() == 1)
-				{
 					_totalResponse = getHeader();
-				}
 				else if (_method == "GET")
 					_totalResponse = execGET(_path, fd);
 				else if (_method == "HEAD")
@@ -106,13 +102,14 @@ int			Response::verifyMethod (int fd, int requestEnd, Cgi& cgi)
 
 	std::string	sendMsg;
 	int			writeSize;
+
 	if (_totalResponse.length() - _sendStartPos >= CGI_BUFFER_SIZE)
 	{
 		sendMsg = _totalResponse.substr(_sendStartPos, CGI_BUFFER_SIZE);
 		writeSize = ::send(fd, sendMsg.c_str(), CGI_BUFFER_SIZE, 0);
 		if (error || writeSize == -1)
 		{
-			if (!error || writeSize == -1)
+			if (!error)
 				printErr("::send()");
 			_totalResponse.clear();
 			return (1);
@@ -127,6 +124,7 @@ int			Response::verifyMethod (int fd, int requestEnd, Cgi& cgi)
 		std::cout << YELLOW << "#######request[" << fd << "] !!!!!" << std::endl;
 		std::cout << _totalResponse.substr(0, 100) << " ... " << _totalResponse.substr(_totalResponse.length() - 20, 20) << std::endl;
 		std::cout << "total response size: " << _totalResponse.size() << ", sendMsg size: " << sendMsg.size() << RESET << std::endl;
+
 		writeSize = ::send(fd, sendMsg.c_str(), sendMsg.length(), 0);
 		if (writeSize == -1)
 		{
@@ -212,7 +210,6 @@ std::string	Response::execPOST (const std::string& path, int fd, const std::stri
 	(void)fd;
 	if (cgi.getCgiExist() == true && getRemainSend() == false)
 	{
-		std::cout << "CGI NAME: " << cgi.getName() << std::endl;
 		fileContent = cgi.executeCgi(cgi.getName());
 
 		std::string	tmpHttp = "HTTP/1.1";
@@ -313,6 +310,7 @@ std::string	Response::execDELETE (std::string& path, int fd)
 {//일단 delete가 제대로 되지 않을 때는 생각하지 않고 무조건 0을 리턴하는 것으로 했다.
 	(void)fd;
 	std::string	fileContent;
+
 	if (pathIsFile(path))
 	{
 		if (remove(path.c_str()) == 0)

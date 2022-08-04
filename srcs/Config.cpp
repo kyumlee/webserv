@@ -30,9 +30,6 @@ int							Config::parse (std::string conf)
 		_serverBlock[i].parse();
 	}
 
-	for (size_t i = 0; i < _serverBlock.size(); i++)
-		std::cout << "after parsing server block host port : " << _serverBlock[i].getAddresses()[0] << std::endl;
-
 	return (0);
 }
 
@@ -82,7 +79,8 @@ int	Config::startServer ()
 				&_serverVec[i]._changeList[0],
 				_serverVec[i]._changeList.size(),
 				_serverVec[i]._eventList,
-				LISTEN_BUFFER_SIZE, &timeVal);
+				LISTEN_BUFFER_SIZE,
+				&timeVal);
 
 			if (newEventsVec[i] == -1)
 			{
@@ -141,7 +139,7 @@ int							Config::initServer(const std::string& conf)
 			_serverVec[v].setServerAllowedMethods(_serverBlock[i].getMethods());
 			_serverVec[v].setResponseRoot(_serverBlock[i].getRoot());
 
-			if (_serverBlock[i].getErrPages().empty() == 1)
+			if (_serverBlock[i].getErrPages().empty() == true)
 				_serverVec[v].initServerErrorPages();
 			else
 				_serverVec[v].setServerErrorPages(_serverBlock[i].getErrPages());

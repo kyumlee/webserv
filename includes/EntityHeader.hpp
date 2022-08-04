@@ -20,7 +20,7 @@ class EntityHeader : public GeneralHeader
 		void					setAllow (const std::string& allow);
 		void					setAllow (const std::set<std::string>& methods);
 		void					setCode (const int& code = 0);
-		void					setAllowedMethods (const std::string& method);
+		void					setAllowedMethod (const std::string& method);
 
 		void					initPossibleMethods ();
 		void					initAllowedMethods (std::vector<std::string> allowedMethods);

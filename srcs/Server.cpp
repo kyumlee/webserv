@@ -268,7 +268,7 @@ void						Server::locationToServer (LocationBlock block, int fd)
 		(_response[fd]._method != "GET" && _response[fd]._path != "/")))
 		_response[fd]._path = block.getPath();
 
-	if (block.getClntSize() != READ_BUFFER_SIZE)
+	if (block.getClntSize() != 0)
 		_clientMaxBodySize = block.getClntSize();
 
 	if (block.getMethods().empty() == false)
@@ -296,7 +296,6 @@ void						Server::locationToServer (LocationBlock block, int fd)
 	if (block.getCGI() != "")
 	{
 		_configCgi = block.getCGI();
-//		std::cout << YELLOW << "cgi: " << _configCgi << RESET << std::endl;
 		_cgi.setCgiExist(true);
 		initCgiEnv(fd);
 	}
@@ -369,12 +368,14 @@ void						Server::eventRead(int fd)
 
 		if (_request[fd].find("\r\n") != std::string::npos && _checkedRequestLine[fd] == 0)
 		{
-			if (_request[fd].at(0) == '\r' && _request[fd].at(1) == '\n')
+			// XXX
+			if (_request[fd].at(0) == 'r' && _request[fd].at(1) == '\n')
 				_request[fd] = _request[fd].substr(2, _request[fd].length() - 2);
 			if (_request[fd].at(0) == '\n')
 				_request[fd] = _request[fd].substr(1, _request[fd].length() - 1);
 			_checkedRequestLine[fd] = 1;
 //			std::cout << "check request line" << std::endl;
+
 			checkRequestLine = _response[fd].checkRequestLine(_request[fd]);
 			if (checkRequestLine == 9)
 			{
@@ -555,13 +556,6 @@ void						Server::eventWrite(int fd)
 				disconnectRequest(fd);
 			if (verifyMethodRet == 2)
 				resetRequest(fd);
-			if (_response[fd].getRemainSend() == false)
-			{
-//				std::cout << "verify_method, code :  " <<  _response[fd]._code << std::endl;
-//				std::cout << RED << "response[fd] path : " << _response[fd].getPath() << RESET << std::endl;
-//				std::cout << CYAN << "body length: " << _response[fd]._body.length() << RESET << std::endl;
-			}
-
 			if (_response[fd]._connection == "close")
 				disconnectRequest(fd);
 			else if (_response[fd].getRemainSend() == false)

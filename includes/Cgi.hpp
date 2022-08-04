@@ -13,7 +13,7 @@ class Cgi
 
 		Cgi&								operator= (Cgi const& cgi);
 
-		void								setEnv (const std::string& env_key, const std::string& env_value);
+		void								setEnv (const std::string& key, const std::string& value);
 		void								setCgiExist (const int& exist);
 		void								setName (const std::string& name);
 		void								setBody (const std::string& body);

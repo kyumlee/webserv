@@ -143,21 +143,24 @@ std::string					sizetToStr (size_t code)
 	return (ret.str());
 }
 
-int							compareURIs (std::string URI, std::string request, int mod) {
-//	size_t		pos = URI.find('/', URI.find('/', 0) + 1) + 1;
+int							compareURIs (std::string URI, std::string request, int mod)
+{
 	size_t		pos = URI.find('/') + 1;
 	char		start;
 	std::string	temp;
 	std::string	temp2;
 
 	temp = &URI[pos];
-	if (URI[pos] != '*') {
-		if (mod == EXACT) {
+	if (URI[pos] != '*')
+	{
+		if (mod == EXACT)
+		{
 			if (temp == &request[1])
 				return (0);
 		}
 
-		if (mod == NONE || mod == PREFERENTIAL) {
+		if (mod == NONE || mod == PREFERENTIAL)
+		{
 			if (temp.find(&request[1], 0) != std::string::npos)
 				return (0);
 		}
@@ -170,12 +173,14 @@ int							compareURIs (std::string URI, std::string request, int mod) {
 		return (1);
 	temp2 = request.substr(request.find(start, 0), request.length() - request.find(start, 0));
 
-	if (mod == EXACT) {
+	if (mod == EXACT)
+	{
 		if (temp == temp2)
 			return (0);
 	}
 
-	if (mod == NONE || mod == PREFERENTIAL) {
+	if (mod == NONE || mod == PREFERENTIAL)
+	{
 		if (temp.find(temp2, 0) != std::string::npos)
 			return (0);
 	}
@@ -191,11 +196,11 @@ int							pathIsFile(const std::string& path)
 	{
 		if (s.st_mode & S_IFREG)
 		{
-			std::cout << "file is regular file\n";
+			std::cout << "file is regular file" << std::endl;
 			return (1);
 		}
 		std::cout << "file type is " << (s.st_mode & S_IFMT) << std::endl;
-		std::cout << "file is not regular file\n";
+		std::cout << "file is not regular file" << std::endl;
 	}
 	
 	return (0);
@@ -239,7 +244,7 @@ std::string					setHtml(const std::string& path, const std::string& lang,
 	return (html);
 }
 
-int							setErrorPage(const std::string& errPages, std::map<int, std::string>* errMap)
+int							setErrorPages(const std::string& errPages, std::map<int, std::string>* errMap)
 {
 	std::vector<std::string>	err = split(errPages, ' ');
 	//errPages를 공백으로 나눈 것을 저장
@@ -247,14 +252,14 @@ int							setErrorPage(const std::string& errPages, std::map<int, std::string>* 
 	err.erase(err.end() - 1);
 	if (html.find(".html") == std::string::npos)
 	{
-		std::cout << "There is no error page html\n";
+		std::cout << "There is no error page html" << std::endl;
 		return (1);
 	}
 	for (std::vector<std::string>::iterator it = err.begin(); it != err.end(); it++)
 	{
 		if (isNumber(*it) == 0)
 		{
-			std::cout << "error code has problem\n";
+			std::cout << "error code has problem" << std::endl;
 			errMap->clear();
 			return (1);
 		}
@@ -281,7 +286,7 @@ void						printSet(std::set<std::string> strSet)
 
 void						printErrmap(std::map<int, std::string> errmap)
 {
-	std::cout << "==================err map==================\n";
+	std::cout << "==================err map==================" << std::endl;
 	for (std::map<int, std::string>::iterator it = errmap.begin();
 		it != errmap.end(); it++)
 	{
@@ -491,18 +496,3 @@ void						printStr (const std::string& str, const std::string& response)
 
 	std::cout << "total size: " << str.length() << std::endl;
 }
-
-// int	main()
-// {
-// 	std::string	str1 = "SHOW1234";
-// 	std::string	str2 = "AHOQ";
-// 	if (isStrUpper(str1) == 1)
-// 		std::cout << "str1 is alpha\n";
-// 	else
-// 		std::cout << "str1 is not alpha\n";
-// 	if (isStrUpper(str2) == 1)
-// 		std::cout << "str2 is alpha\n";
-// 	else
-// 		std::cout << "str2 is not alpha\n";
-
-// }

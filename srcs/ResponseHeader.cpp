@@ -114,7 +114,6 @@ std::string					ResponseHeader::writeHeader ()
 		header += "Transfer-Encoding: " + _transferEncoding + "\r\n";
 	if (_transferEncoding == "chunked")
 		header += "Transfer-Encoding: identity\r\n";
-	//
 	
 	if (_wwwAuthenticate != "")
 		header += "WWW-Authenticate: " + _wwwAuthenticate + "\r\n";

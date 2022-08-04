@@ -6,7 +6,7 @@ Cgi::~Cgi () {}
 
 Cgi&								Cgi::operator= (Cgi const& cgi) { (void)cgi; return (*this); }
 
-void								Cgi::setEnv (const std::string& env_key, const std::string& env_value) { _env[env_key] = env_value; }
+void								Cgi::setEnv (const std::string& key, const std::string& value) { _env[key] = value; }
 void								Cgi::setCgiExist (const int& exist) { _exists = exist; }
 void								Cgi::setName (const std::string& name) { _name = name; }
 void								Cgi::setBody (const std::string& body) { _body = body; }
@@ -191,7 +191,7 @@ void								Cgi::initEnv()
 	_env["SERVER_PROTOCOL"] = "HTTP/1.1";
 	//웹서버의 이름과 버전을 나타낸다.
 	// 형식: 이름/버전
-	_env["SERVER_SOFTWARE"] = "Weebserv/1.0";
+	_env["SERVER_SOFTWARE"] = "Webserv/1.0";
 	
 	// _env.insert(config.getCgiParam().begin(), config.getCgiParam().end());
 }

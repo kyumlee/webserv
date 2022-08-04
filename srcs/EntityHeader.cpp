@@ -7,7 +7,7 @@ EntityHeader::~EntityHeader() {}
 EntityHeader&			EntityHeader::operator= (const EntityHeader& eh) { (void)eh; return (*this); }
 
 void					EntityHeader::setContentLength (const size_t& size)
-{ _contentLength = sizetToStr(size); }
+{ _contentLength = intToStr(size); }
 
 void					EntityHeader::setContentLength (const std::string& path, const std::string& contentLength)
 {
@@ -122,13 +122,13 @@ void					EntityHeader::initPossibleMethods ()
 	_possibleMethods.insert("HEAD");
 }
 
-void					EntityHeader::setAllowedMethods (const std::string& method)
+void					EntityHeader::setAllowedMethod (const std::string& method)
 { _allowedMethods.insert(method); }
 
 void					EntityHeader::initAllowedMethods (std::vector<std::string> allowedMethods)
 {
 	for (std::vector<std::string>::iterator it = allowedMethods.begin(); it != allowedMethods.end(); it++)
-		setAllowedMethods(*it);
+		setAllowedMethod(*it);
 }
 
 std::string				EntityHeader::getContentLength () const { return (_contentLength); }

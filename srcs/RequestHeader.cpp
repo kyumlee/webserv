@@ -21,7 +21,6 @@ int				RequestHeader::checkRequestLine (std::string requestLine)
 	if (isStrUpper(_method) == 0)
 		return (1);
 
-//	requestLineIt++;
 	_path = *requestLineIt++;
 
 	if (_path != "/" && _path.at(0) == '/')
@@ -41,7 +40,6 @@ int				RequestHeader::checkRequestLine (std::string requestLine)
 	else if (requestLineVec.size() == 2)
 		return (printErr("invalid request line"));
 
-//	requestLineIt++;
 	_httpVersion = *requestLineIt;
 
 	if (_httpVersion == "HTTP/1.0")
@@ -113,8 +111,8 @@ int				RequestHeader::checkHeader (std::vector<std::string> header)
 			_contentLength = "";
 			return (printErr("content-length is not a number"));
 		}
-		_bodySize = strToInt(_contentLength);
-//			_bodySize = std::atoi(_contentLength.c_str());
+		else
+			_bodySize = std::atoi(_contentLength.c_str());
 	}
 	if (checkEssentialHeader() == 1)
 		return (1);
@@ -139,7 +137,8 @@ int				RequestHeader::checkAvailableHeader (const std::string& header, char colo
 		return (1);
 
 	//공백이 있고 콜론이 있을 때 공백이 콜론보다 뒤에 있으면 정상
-	return (0);
+	else
+		return (0);
 }
 
 int				RequestHeader::checkEssentialHeader ()
@@ -156,7 +155,8 @@ int				RequestHeader::checkEssentialHeader ()
 			return (printErr("both content-length and transfer-encoding exist"));
 		else if (_contentLength != "" || _transferEncoding != "")
 			return (0);
-		return (printErr("either content-length or transfer-encoding doesn't exist"));
+		else
+			return (printErr("either content-length or transfer-encoding doesn't exist"));
 	}
 
 	return (0);
