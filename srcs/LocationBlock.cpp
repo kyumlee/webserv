@@ -8,7 +8,7 @@ LocationBlock::LocationBlock ()
 	_methods(),
 	_redirect(),
 	_root("."),
-	_autoindex(DEFAULT_AUTOINDEX),
+	_autoindex(ON),
 	_index(),
 	_cgi(""),
 	_locations(),
@@ -23,7 +23,7 @@ LocationBlock::LocationBlock (std::string block)
 	_methods(),
 	_redirect(),
 	_root("."),
-	_autoindex(DEFAULT_AUTOINDEX),
+	_autoindex(ON),
 	_index(),
 	_cgi(""),
 	_locations(),
@@ -202,10 +202,14 @@ int							LocationBlock::parseAutoindex ()
 int							LocationBlock::parseIndex ()
 {
 	std::string				index;
-	std::pair<bool, size_t>	res = skipKey(_block, "index", ";");
+	std::pair<bool, size_t>	res = skipKey(_block, "\tindex", ";");
 
 	if (res.first == false)
+	{
+		std::vector<std::string>	idx;
+		idx.push_back("youpi.bad_extension");
 		return (0);
+	}
 
 	index = parseValue(_block, res.second, ";");
 	setIndex(split(index, ' '));

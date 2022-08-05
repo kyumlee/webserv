@@ -9,7 +9,7 @@ ServerBlock::ServerBlock ()
 	_root(),
 	_locations(),
 	_methods(),
-	_autoindex(DEFAULT_AUTOINDEX),
+	_autoindex(ON),
 	_index()
 {}
 
@@ -22,7 +22,7 @@ ServerBlock::ServerBlock (std::string block)
 	_root(),
 	_locations(),
 	_methods(),
-	_autoindex(DEFAULT_AUTOINDEX),
+	_autoindex(ON),
 	_index()
 {}
 
@@ -220,11 +220,11 @@ int							ServerBlock::parseAutoindex () {
 
 int							ServerBlock::parseIndex () {
 	std::string				index;
-	std::pair<bool, size_t>	res = skipKey(_block, "index", ";");
+	std::pair<bool, size_t>	res = skipKey(_block, "\tindex", ";");
 
 	if (res.first == false) {
 		std::vector<std::string>	idx;
-		idx.push_back("index.html");
+		idx.push_back("youpi.bad_extension");
 		setIndex(idx);
 		return (0);
 	}

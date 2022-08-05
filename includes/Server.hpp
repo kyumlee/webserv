@@ -6,8 +6,7 @@
 
 class Server
 {
-	public:
-	// private:
+	private:
 		struct sockaddr_in			_serverAddr; //server의 주소를 저장
 		int							_serverSocket; //serverSocket의 fd를 저장
 		t_listen					_listen; //listen할 host와 port를 저장
@@ -70,6 +69,10 @@ class Server
 		void						setResponseRoot (const std::string& root);
 		void						setServerErrorPages (const int& code, const std::string& html);
 		void						setServerErrorPages (const std::map<int, std::string>& html);
+		void						setServerRoot (const std::string& root);
+		void						setClientMaxBodySize (const size_t& size);
+		void						setAutoindex (const int& autoindex);
+		void						setIndex (const std::vector<std::string>& index);
 
 		void						initServerErrorPages ();
 
@@ -77,6 +80,17 @@ class Server
 		std::vector<std::string>	getServerAllowedMethods () const;
 		std::string					getResponseRoot () const;
 		std::map<int, std::string>	getServerErrorPages () const;
+		t_listen					getListen () const;
+		struct sockaddr_in			getServerAddr () const; //server의 주소를 저장
+		int							getServerSocket () const; //serverSocket의 fd를 저장
+		int							getKq (); //kqueue를 통해 받은 fd를 저장
+		std::map<int, std::string>	getRequest (); //request의 socket과 socket의 내용을 저장
+		std::vector<struct kevent>	getChangeList (); //kevent를 모두 저장
+		void						resetChangeList ();
+		struct kevent&				getEventList (int index); //이벤트가 발생한 kevent를 저장
+		struct kevent*				getEventList ();
+		std::vector<LocationBlock>	getLocations ();
+		void						addLocation (LocationBlock& lb);
 
 		void						setCgiEnv (int fd);
 

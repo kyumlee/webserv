@@ -52,7 +52,7 @@ std::string	Response::responseErr ()
 
 //요청마다 header를 만들어야 하고 에러가 발생했을 때에 errormap을 적절히 불러와야 한다.
 //request의 method를 확인한다.
-int			Response::verifyMethod (int fd, int requestEnd, Cgi& cgi)
+int			Response::verifyMethod (int fd, int requestEnd, int autoindex, std::string index, Cgi& cgi)
 {
 	int			error = 0, ret = 0;
 
@@ -76,22 +76,16 @@ int			Response::verifyMethod (int fd, int requestEnd, Cgi& cgi)
 			}
 			else if (getRemainSend() == false)
 			{
-				if (getPath() == "/" && _method == "GET")
-					setPath(getRoot() + "/index.html");
+//				if (getPath() == "/" && _method == "GET")
+//					setPath(getRoot() + "/index.html");
 				if (checkAllowedMethods() == 1)
 					_totalResponse = getHeader();
 				else if (_method == "GET")
-					_totalResponse = execGET(_path, fd);
+					_totalResponse = execGET(_path, fd, autoindex, index);
 				else if (_method == "HEAD")
-					_totalResponse = execHEAD(_path, fd);
+					_totalResponse = execHEAD(_path, fd, autoindex, index);
 				else if (_method == "POST")
-				{
 					_totalResponse = execPOST(_path, fd, _body, cgi);
-//					if (_totalResponse.length() >= 300)
-//						std::cout << RED << "RESPONSE: " << _totalResponse.substr(0, 300) << std::endl << RESET;
-//					else
-//						std::cout << RED << "RESPONSE: " << _totalResponse << std::endl << RESET;
-				}
 				else if (_method == "PUT")
 					_totalResponse = execPUT(_path, fd, _body);
 				else if (_method == "DELETE")
@@ -169,25 +163,31 @@ int			Response::verifyMethod (int fd, int requestEnd, Cgi& cgi)
 	return (ret);
 }
 
-std::string	Response::execGET (std::string& path, int fd)
+std::string	Response::execGET (std::string& path, int fd, int autoindex, std::string index)
 {
 	std::string			fileContent = "";
 	std::ifstream		file;
 	std::stringstream	buffer;
+	std::string			html = setHtml(path, "en", "utf-8", "directory listing", sizetToStr(_listen.host), _listen.port);
 
 	(void)fd;
-	if (path == "YoupiBanane")
-		path = "YoupiBanane/index.html";
-	if (compareEnd(path, "nop") == 0)
-		path = "YoupiBanane/nop/youpi.bad_extension";
-
-	if (compareEnd(path, "Yeah") == 0)
+	if (autoindex == 0 && html != "")
 	{
-		printErr("Yeah not found");
-		setCode(Not_Found);
+		setCode(OK);
+		_contentType = "text/html";
+		buffer << html;
 	}
 	else
 	{
+		if (autoindex == 1 && pathIsFile(path) == 2)
+		{
+			if (path == "/")
+				path = getRoot();
+			if (path.back() != '/')
+				path += "/";
+			path += index;
+
+		}
 		file.open(path.c_str(), std::ifstream::in);
 		if (file.is_open() == false)
 		{
@@ -208,9 +208,9 @@ std::string	Response::execGET (std::string& path, int fd)
 	return (fileContent);
 }
 
-std::string	Response::execHEAD (std::string& path, int fd)
+std::string	Response::execHEAD (std::string& path, int fd, int autoindex, std::string index)
 {
-	std::string			fileContent = execGET(path, fd);
+	std::string			fileContent = execGET(path, fd, autoindex, index);
 	fileContent = fileContent.substr(0, getHeader().length());
 	return (fileContent);
 }

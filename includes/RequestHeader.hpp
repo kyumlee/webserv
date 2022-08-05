@@ -19,10 +19,7 @@ class RequestHeader : public EntityHeader
 		int				checkEssentialHeader ();
 
 		int				splitRequest (std::string request, int bodyCondition);
-
-		bool			hostToInt (std::string host);
 		
-		int				setListen (const std::string& strHost = "");
 		void			setHost (const std::string& host = "");
 		void			setUserAgent (const std::string& userAgent = "");
 		void			setAccept (const std::string& accept = "");

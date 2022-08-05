@@ -42,7 +42,7 @@ class ResponseHeader : public RequestHeader
 
 		void						printResponseHeader ();
 	
-	// protected:
+	protected:
 		std::string					_server; //웹서버 정보
 		std::string					_wwwAuthenticate; //사용자 인증이 필요한 자원을 요구할 시, 서버가 제공하는 인증 방식
 		std::string					_retryAfter; //다시 접속하라고 알릴 때

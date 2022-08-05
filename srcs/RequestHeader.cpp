@@ -61,7 +61,7 @@ int				RequestHeader::checkHeader (std::vector<std::string> header)
 			if (_host.find("http://", 0) != std::string::npos)
 				_host = _host.substr(7, _host.length() - 7);
 
-			if (setListen(_host) == 1)
+			if (setListen(_host, &_listen) == 1)
 				return (1);
 		}
 		else if (strncmp((*it).c_str(), "User-Agent:", 11) == 0)
@@ -203,86 +203,6 @@ int				RequestHeader::splitRequest (std::string request, int bodyCondition)
 
 	if (checkHeader(strHeader) == 1)
 		return (1);
-
-	return (0);
-}
-
-//string형인 host를 사용할 수 있도록 unsigned int형으로 바꿔준다.
-bool			RequestHeader::hostToInt (std::string host)
-{
-	size_t			sep = 0, start = 0;
-	unsigned int	n, ret = 0;
-	std::string		substr;
-
-	if (host == "localhost")
-		host = "127.0.0.1";
-
-	//host가 그냥 숫자로 되어있을 떄
-	if (isNumber(host) == 1)
-	{
-		ret = std::atoi(host.c_str());
-		_listen.host = ret;
-		return (0);
-	}
-	for (int i = 3; i > -1; i--)
-	{
-		sep = host.find_first_of('.', sep);
-
-		if (i != 0 && sep == std::string::npos)
-			return (printErr("missing . in host address"));
-
-		if (i == 0)
-			sep = host.length();
-
-		substr = host.substr(start, sep - start);
-		if (isNumber(substr) == 0)
-			return (printErr("host address is not a number"));
-
-		n = std::atoi(substr.c_str());
-		for (int j = 0; j < i; j++)
-			n *= 256;
-		ret += n;
-		sep++; start = sep;
-	}
-	_listen.host = ret;
-
-	return (0);
-}
-
-int				RequestHeader::setListen (const std::string& strHost)
-{//에러가 발생하면 1을 리턴, 정상작동하면 0을 리턴
-	if (strHost == "")
-		return (printErr("host header doesn't exist"));
-
-	std::vector<std::string>	hostPort;
-	unsigned int				host;
-	int							port;
-
-	hostPort = split(strHost, ':');
-
-	//포트는 생략할 수 있다. HTTP URL에서는 port default가 80이다.
-	if (*hostPort.begin() == strHost)
-	{
-		_listen.port = htons(DEFAULT_PORT);
-		//strHost가 이상한 값을 가지고 있을 때
-		if ((host = hostToInt(strHost)) == 1)
-			return (printErr("invalid host"));
-
-		_listen.host = htonl(host);
-
-		return (0);
-	}
-
-	if (isNumber(*(hostPort.begin() + 1)) == 0)
-		return (printErr("port is not a number"));
-
-	port = std::atoi((*(hostPort.begin() + 1)).c_str());
-	_listen.port = htons(port);
-
-	if ((host = hostToInt(*hostPort.begin())) == 1)
-		return (1);
-
-	_listen.host = htonl(host);
 
 	return (0);
 }

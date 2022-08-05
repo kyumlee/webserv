@@ -24,21 +24,14 @@ void						Server::disconnectRequest (int fd)
 
 void						Server::checkConnection (int fd)
 {
-	if (_response[fd]._connection == "close")
+	if (_response[fd].getConnection() == "close")
 		disconnectRequest(fd);
 }
 
 int							Server::initListen (const std::string& hostPort)
 {
-/*	if (_response.setListen(hostPort) == 1)
+	if (setListen(hostPort, &_listen) == 1)
 		return (printErr("failed to listen"));
-
-	_listen.host = _response._listen.host;
-	_listen.port = _response._listen.port;*/
-	(void)hostPort;
-
-	_listen.host = (unsigned int)0;
-	_listen.port = htons(8000);
 
 	std::cout << "init listen host : " << _listen.host;
 	std::cout << ", port : " << _listen.port << std::endl;
@@ -138,11 +131,27 @@ void						Server::initServerErrorPages ()
 	setServerErrorPages(Payload_Too_Large, PAYLOAD_TOO_LARGE_HTML);
 	setServerErrorPages(Internal_Server_Error, INTERNAL_SERVER_ERROR_HTML);
 }
+void						Server::setServerRoot (const std::string& root) { _serverRoot = root; }
+void						Server::setClientMaxBodySize (const size_t& size) { _clientMaxBodySize = size; }
+void						Server::setAutoindex (const int& autoindex) { _autoindex = autoindex; }
+void						Server::setIndex (const std::vector<std::string>& index) { _index = index; }
 
 std::string					Server::getServerName () const { return (_serverName); }
 std::vector<std::string>	Server::getServerAllowedMethods () const { return (_serverAllowedMethods); }
 std::string					Server::getResponseRoot () const { return (_responseRoot); }
 std::map<int, std::string>	Server::getServerErrorPages () const { return (_serverErrorPages); }
+t_listen					Server::getListen () const { return (_listen); }
+struct sockaddr_in			Server::getServerAddr () const { return (_serverAddr); }
+int							Server::getServerSocket () const { return (_serverSocket); }
+int							Server::getKq () { return (_kq); }
+std::map<int, std::string>	Server::getRequest () { return (_request); }
+std::vector<struct kevent>	Server::getChangeList () { return (_changeList); }
+struct kevent&				Server::getEventList (int index) { return (_eventList[index]); }
+struct kevent*				Server::getEventList () { return (_eventList); }
+void						Server::resetChangeList () { _changeList.clear(); }
+std::vector<LocationBlock>	Server::getLocations () { return (_locations); }
+void						Server::addLocation (LocationBlock& lb)
+{ _locations.push_back(lb); }
 
 void						Server::setCgiEnv (int fd)
 {
@@ -174,7 +183,6 @@ LocationBlock				Server::selectLocationBlock (std::string requestURI, int fd)
 	std::vector<std::string>	requestURIvec;
 	size_t						max = 0, ret = 0;
 
-//	std::cout << "requestURI : " << requestURI << std::endl;
 	requestURIvec = split(requestURI, '/');
 
 	for (size_t i = 1; i < requestURIvec.size(); i++)
@@ -195,7 +203,6 @@ LocationBlock				Server::selectLocationBlock (std::string requestURI, int fd)
 	{
 		if (_locations[i].getMod() == NONE || _locations[i].getMod() == PREFERENTIAL)
 		{
-//			std::cout << "locations uri : " << _locations[i].getURI() << ", requestURI first : " << requestURIvec[0] << std::endl;
 			if (_locations[i].getURI() == requestURIvec[0])
 			{
 				std::string	changePath = "";
@@ -209,11 +216,9 @@ LocationBlock				Server::selectLocationBlock (std::string requestURI, int fd)
 			}
 			if (requestURIvec.size() >= 2)
 			{
-//				std::cout << CYAN << "request uri : " << requestURI << ", location uri: " << _locations[i].getURI() << ";" << std::endl << RESET;
 				std::vector<LocationBlock>	nested = _locations[i].getLocationBlocks();
 				for (size_t j = 0; j < nested.size(); j++)
 				{
-//					std::cout << BLUE << "nested uri: " << nested[j].getURI() << RESET << std::endl;
 					if (!compareURIs(nested[j].getURI(), requestURIvec[1], nested[j].getMod()))
 					{
 						std::string	changePath = "";
@@ -287,8 +292,8 @@ void						Server::locationToServer (LocationBlock block, int fd)
 		}
 	}
 
-	if (block.getAutoindex() != DEFAULT_AUTOINDEX)
-		_autoindex = block.getAutoindex();
+//	if (block.getAutoindex() == OFF)
+	_autoindex = block.getAutoindex();
 
 	if (block.getIndex().empty() == false)
 		_index = block.getIndex();
@@ -323,6 +328,8 @@ void						Server::resetRequest (int fd)
 	_bodyVecTotalSize[fd] = 0;
 	_response[fd]._body.clear();
 	_response[fd]._root = _serverRoot;
+	_autoindex = ON;
+	_index.clear();
 }
 
 void						Server::eventRead(int fd)
@@ -339,7 +346,7 @@ void						Server::eventRead(int fd)
 		int		n;
 
 		// read as much as content-length
-		if (_response[fd]._contentLength != "" && _bodyCondition[fd] == Body_Start)
+		if (_response[fd].getContentLength() != "" && _bodyCondition[fd] == Body_Start)
 		{
 			if (_response[fd]._bodySize >= _clientMaxBodySize && _clientMaxBodySize != 0)
 			{
@@ -386,7 +393,7 @@ void						Server::eventRead(int fd)
 				printErr("check request line");
 				std::cout << RED << "@@@@@@@@request@@@@@@@@" << std::endl << _request[fd] << RESET << std::endl;
 				_response[fd]._httpVersion = "HTTP/1.1";
-				_response[fd]._contentLocation = "/";
+				_response[fd].setContentLocation("/");
 				_response[fd].setCode(Bad_Request);
 				return ;
 			}
@@ -457,13 +464,13 @@ void						Server::eventRead(int fd)
 		}
 
 		//body size만큼 입력 받았을 때
-		if (_response[fd]._bodySize != 0 && _response[fd]._contentLength != "" && _request[fd].length() - _bodyStartPos[fd] >= _response[fd]._bodySize)
+		if (_response[fd]._bodySize != 0 && _response[fd].getContentLength() != "" && _request[fd].length() - _bodyStartPos[fd] >= _response[fd]._bodySize)
 		{
 			_requestEnd[fd] = 1;
 			_request[fd] = _request[fd].substr(0, _bodyStartPos[fd] + _response[fd]._bodySize);
 		}
 		//contentLength가 없고, transferEncoding이 chunked일 때 파일의 끝을 알리는 것이 들어올 때까지 계속 recv
-		if (_response[fd]._transferEncoding == "chunked")
+		if (_response[fd].getTransferEncoding() == "chunked")
 		{
 			while (_rnPos[fd] < _request[fd].length() && _response[fd]._path != "/")
 			{
@@ -526,11 +533,11 @@ void						Server::eventRead(int fd)
 		{
 			if (_bodyStartPos[fd] != 0 && _bodyStartPos[fd] < _request[fd].length())
 			{
-				if (_response[fd]._transferEncoding == "chunked" && _response[fd]._bodyVec.empty() == false)
+				if (_response[fd].getTransferEncoding() == "chunked" && _response[fd]._bodyVec.empty() == false)
 				{
 					for (std::vector<std::string>::iterator it = _response[fd]._bodyVec.begin(); it != _response[fd]._bodyVec.end(); it++)
 						_response[fd]._body += *it;
-					_response[fd]._contentLength = sizetToStr(_bodyVecTotalSize[fd]);
+					_response[fd].setContentLength(_bodyVecTotalSize[fd]);
 					setCgiEnv(fd);
 				}
 				else
@@ -550,13 +557,13 @@ void						Server::eventWrite(int fd)
 	{
 		if (_requestEnd[fd] == 1) 
 		{
-			int	verifyMethodRet = _response[fd].verifyMethod(fd, _requestEnd[fd], _cgi[fd]);
+			int	verifyMethodRet = _response[fd].verifyMethod(fd, _requestEnd[fd], _autoindex, _index[0], _cgi[fd]);
 			if (verifyMethodRet == 1)
 				disconnectRequest(fd);
 			if (verifyMethodRet == 2)
 				resetRequest(fd);
 
-			if (_response[fd]._connection == "close")
+			if (_response[fd].getConnection() == "close")
 				disconnectRequest(fd);
 			else if (_response[fd].getRemainSend() == false)
 				resetRequest(fd);

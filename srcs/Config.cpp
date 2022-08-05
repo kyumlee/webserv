@@ -58,7 +58,7 @@ int	Config::startServer ()
 
 //		(*it).initServerMember();
 
-		std::cout << YELLOW << "host : " << (*it)._listen.host << ", port : " << (*it)._listen.port;
+		std::cout << YELLOW << "host : " << (*it).getListen().host << ", port : " << (*it).getListen().port;
 		std::cout << " server start!!!!!!" << std::endl << RESET;
 	}
 
@@ -75,12 +75,18 @@ int	Config::startServer ()
 
 		for (size_t i = 0; i < _serverVec.size(); i++, it++)
 		{
-			newEventsVec[i] = kevent(_serverVec[i]._kq,
-				&_serverVec[i]._changeList[0],
-				_serverVec[i]._changeList.size(),
-				_serverVec[i]._eventList,
+			newEventsVec[i] = kevent(_serverVec[i].getKq(),
+				&_serverVec[i].getChangeList()[0],
+				_serverVec[i].getChangeList().size(),
+				_serverVec[i].getEventList(),
 				LISTEN_BUFFER_SIZE,
 				&timeVal);
+/*			newEventsVec[i] = kevent(_serverVec[i].getKq(),
+				&_serverVec[i].getChangeList()[0],
+				_serverVec[i].getChangeList().size(),
+				_serverVec[i].getEventList(),
+				LISTEN_BUFFER_SIZE,
+				&timeVal);*/
 
 			if (newEventsVec[i] == -1)
 			{
@@ -88,11 +94,12 @@ int	Config::startServer ()
 				_serverVec.erase(it);
 				continue ;
 			}
-			_serverVec[i]._changeList.clear();
+//			_serverVec[i]._changeList.clear();
+			_serverVec[i].resetChangeList();
 
 			for (int occurEvent = 0; occurEvent < newEventsVec[i]; occurEvent++)
 			{
-				currEventVec[i] = &_serverVec[i]._eventList[occurEvent];
+				currEventVec[i] = &_serverVec[i].getEventList(occurEvent);
 				if (currEventVec[i]->flags & EV_ERROR)
 				{
 					if (_serverVec[i].eventError(currEventVec[i]->ident) == 1)
@@ -139,18 +146,21 @@ int							Config::initServer(const std::string& conf)
 			_serverVec[v].setServerAllowedMethods(_serverBlock[i].getMethods());
 			_serverVec[v].setResponseRoot(_serverBlock[i].getRoot());
 
+			_serverVec[v].setAutoindex(_serverBlock[i].getAutoindex());
+			_serverVec[v].setIndex(_serverBlock[i].getIndex());
+
 			if (_serverBlock[i].getErrPages().empty() == true)
 				_serverVec[v].initServerErrorPages();
 			else
 				_serverVec[v].setServerErrorPages(_serverBlock[i].getErrPages());
 
-			_serverVec[v]._serverRoot = _serverBlock[i].getRoot();
-			_serverVec[v]._clientMaxBodySize = _serverBlock[i].getClntSize();
-			_serverVec[v]._autoindex = _serverBlock[i].getAutoindex();
-			_serverVec[v]._index = _serverBlock[i].getIndex();
+			_serverVec[v].setServerRoot(_serverBlock[i].getRoot());
+			_serverVec[v].setClientMaxBodySize(_serverBlock[i].getClntSize());
+			_serverVec[v].setAutoindex(_serverBlock[i].getAutoindex());
+			_serverVec[v].setIndex(_serverBlock[i].getIndex());
 
 			for (size_t l = 0; l < _serverBlock[i].getLocationBlocks().size(); l++)
-				_serverVec[v]._locations.push_back(_serverBlock[i].getLocationBlocks()[l]);
+				_serverVec[v].addLocation(_serverBlock[i].getLocationBlocks()[l]);
 		}
 	}
 

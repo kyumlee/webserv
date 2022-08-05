@@ -1,6 +1,8 @@
 #include "./../includes/EntityHeader.hpp"
 
-EntityHeader::EntityHeader () {}
+EntityHeader::EntityHeader ()
+	: _contentLength("")
+{}
 EntityHeader::EntityHeader (const EntityHeader& eh) { (void)eh; }
 EntityHeader::~EntityHeader() {}
 
@@ -112,6 +114,9 @@ void					EntityHeader::setCode (const int& code)
 	else
 		_code = 0;
 }
+
+void					EntityHeader::setContentLocation (const std::string& loc)
+{ _contentLocation = loc; }
 
 void					EntityHeader::initPossibleMethods ()
 {

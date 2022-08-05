@@ -24,7 +24,7 @@
 # include <cctype> //isalpha
 # include <cmath>
 
-# define DEFAULT_CONF		"./../conf/mac2.conf"
+# define DEFAULT_CONF		"./conf/mac2.conf"
 # define NONE				0
 # define EXACT				1
 # define PREFERENTIAL		2
@@ -163,6 +163,8 @@ int							isStrUpper (const std::string& str);
 
 int							makeHtml (const std::string& htmlName, int code, const std::string& codeStr, const std::string& serverName);
 
+bool						hostToInt (std::string host, t_listen* listen);
+int							setListen (std::string host, t_listen* listen);
 size_t						calExponent (const std::string& str);
 
 int							checkHex (std::string& hex);

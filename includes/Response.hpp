@@ -28,10 +28,10 @@ class Response : public ResponseHeader
 
 		std::string	responseErr ();
 
-		int			verifyMethod (int fd, int requestEnd, Cgi& cgi);
+		int			verifyMethod (int fd, int requestEnd, int autoindex, std::string index, Cgi& cgi);
 
-		std::string	execGET (std::string& path, int fd);
-		std::string	execHEAD (std::string& path, int fd);
+		std::string	execGET (std::string& path, int fd, int autoindex, std::string index);
+		std::string	execHEAD (std::string& path, int fd, int autoindex, std::string index);
 		std::string	execPOST (const std::string& path, int fd, const std::string& body, Cgi& cgi);
 		std::string	execPUT (const std::string& path, int fd, std::string& body);
 		std::string	execDELETE (std::string& path, int fd);

@@ -199,6 +199,11 @@ int							pathIsFile(const std::string& path)
 			std::cout << "file is regular file" << std::endl;
 			return (1);
 		}
+		if (s.st_mode & S_IFDIR)
+		{
+			std::cout << "file is directory" << std::endl;
+			return (2);
+		}
 		std::cout << "file type is " << (s.st_mode & S_IFMT) << std::endl;
 		std::cout << "file is not regular file" << std::endl;
 	}
@@ -217,15 +222,14 @@ std::string					setUri(const std::string& dirList, const std::string& dirName,
 
 std::string					setHtml(const std::string& path, const std::string& lang,
 	const std::string& charset, const std::string& h1, const std::string& host, const int port)
+
 {
 	DIR*	dir = opendir(path.c_str());
 	if (dir == NULL)
-	{
-		printErr("failed to open " + path);
-		//dir을 열지 못했을 때 어떤 값을 리턴할 지 생각하자
 		return "";
-	}
+
 	std::string	dirName(path);
+
 	if (dirName[0] != '/')
 		dirName = "/" + dirName;
 	std::string	html = "<!DOCTYPE html>\n";
@@ -236,11 +240,14 @@ std::string					setHtml(const std::string& path, const std::string& lang,
 	"\t</head>\n" + \
 	"\t<body>\n" + \
 	"\t\t<h1>" + h1 + "</h1>\n";
+
 	struct dirent*	dirList;
 	while ((dirList = readdir(dir)) != NULL)
 		html += setUri(std::string(dirList->d_name), dirName, host, port);
 	html += "\t</body>\n</html>";
+
 	closedir(dir);
+
 	return (html);
 }
 
@@ -424,6 +431,85 @@ int							makeHtml(const std::string& htmlName, int code, const std::string& cod
 	"</html>";
 	htmlFile << fileContent;
 	htmlFile.close();
+	return (0);
+}
+
+bool					hostToInt (std::string host, t_listen* listen)
+{
+	size_t			sep = 0, start = 0;
+	unsigned int	n, ret = 0;
+	std::string		substr;
+
+	if (host == "localhost")
+		host = "127.0.0.1";
+
+	//host가 그냥 숫자로 되어있을 떄
+	if (isNumber(host) == 1)
+	{
+		ret = std::atoi(host.c_str());
+		listen->host = ret;
+		return (0);
+	}
+	for (int i = 3; i > -1; i--)
+	{
+		sep = host.find_first_of('.', sep);
+
+		if (i != 0 && sep == std::string::npos)
+			return (printErr("missing . in host address"));
+
+		if (i == 0)
+			sep = host.length();
+
+		substr = host.substr(start, sep - start);
+		if (isNumber(substr) == 0)
+			return (printErr("host address is not a number"));
+
+		n = std::atoi(substr.c_str());
+		for (int j = 0; j < i; j++)
+			n *= 256;
+		ret += n;
+		sep++; start = sep;
+	}
+	listen->host = ret;
+
+	return (0);
+}
+
+int						setListen (std::string strHost, t_listen* listen)
+{//에러가 발생하면 1을 리턴, 정상작동하면 0을 리턴
+	if (strHost == "")
+		return (printErr("host header doesn't exist"));
+
+	std::vector<std::string>	hostPort;
+	unsigned int				host;
+	int							port;
+
+	hostPort = split(strHost, ':');
+
+	//포트는 생략할 수 있다. HTTP URL에서는 port default가 80이다.
+	if (*hostPort.begin() == strHost)
+	{
+		listen->port = htons(DEFAULT_PORT);
+		//strHost가 이상한 값을 가지고 있을 때
+		if ((host = hostToInt(strHost, listen)) == 1)
+			return (printErr("invalid host"));
+
+		listen->host = htonl(host);
+
+		return (0);
+	}
+
+	if (isNumber(*(hostPort.begin() + 1)) == 0)
+		return (printErr("port is not a number"));
+
+	port = std::atoi((*(hostPort.begin() + 1)).c_str());
+	listen->port = htons(port);
+
+	if ((host = hostToInt(*hostPort.begin(), listen)) == 1)
+		return (1);
+
+	listen->host = htonl(host);
+
 	return (0);
 }
 

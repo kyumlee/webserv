@@ -12,10 +12,11 @@ class EntityHeader : public GeneralHeader
 
 		EntityHeader&			operator= (const EntityHeader& eh);
 
-		void					setContentLength (const size_t& size = 0);
-		void					setContentLength (const std::string& path = "", const std::string& contentLength = "");
-		void					setContentTypeLocation (const std::string& path, std::string type = "", std::string contentLocation = "");
+		void					setContentLength (const size_t& size);
+		void					setContentLength (const std::string& path, const std::string& contentLength);
+		void					setContentTypeLocation (const std::string& path, std::string type, std::string contentLocation);
 		void					setContentLanguage (const std::string& contentLanguage = "en");
+		void					setContentLocation (const std::string& loc);
 		void					setContentEncoding (const std::string& contentEncoding = "");
 		void					setAllow (const std::string& allow);
 		void					setAllow (const std::set<std::string>& methods);
@@ -37,7 +38,7 @@ class EntityHeader : public GeneralHeader
 
 		void					printEntityHeader () const;
 	
-	// protected:
+	public:
 		std::string				_contentLength; //메시지의 크기
 		std::string				_contentType; //컨텐츠의 타입(MIME)과 문자열 인코딩(utf-8등)을 명시
 		//ex) Content-Type: text/html; charset=utf-8

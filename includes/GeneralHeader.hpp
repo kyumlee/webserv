@@ -24,7 +24,7 @@ class GeneralHeader
 
 		void			printGeneralHeader () const;
 
-	// protected:
+	protected:
 		std::string	_date; //HTTP메시지가 만들어진 시각
 		std::string	_connection; //일반적으로 HTTP/1.1을 사용 ex); Connection: keep-alive
 		std::string	_transferEncoding; //사용자에게 entity를 안전하게 전송하기 위해 사용하는 인코딩 형식을 지정
