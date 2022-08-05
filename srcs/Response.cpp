@@ -85,7 +85,13 @@ int			Response::verifyMethod (int fd, int requestEnd, Cgi& cgi)
 				else if (_method == "HEAD")
 					_totalResponse = execHEAD(_path, fd);
 				else if (_method == "POST")
+				{
 					_totalResponse = execPOST(_path, fd, _body, cgi);
+//					if (_totalResponse.length() >= 300)
+//						std::cout << RED << "RESPONSE: " << _totalResponse.substr(0, 300) << std::endl << RESET;
+//					else
+//						std::cout << RED << "RESPONSE: " << _totalResponse << std::endl << RESET;
+				}
 				else if (_method == "PUT")
 					_totalResponse = execPUT(_path, fd, _body);
 				else if (_method == "DELETE")
@@ -130,6 +136,14 @@ int			Response::verifyMethod (int fd, int requestEnd, Cgi& cgi)
 		{
 			_totalResponse.clear();
 			return (printErr("::send()"));
+		}
+		if (writeSize != (int)sendMsg.length())
+		{
+			std::cout << "send msg length: " << sendMsg.length() << ", write size: " << writeSize << std::endl;
+			_sendStartPos += writeSize;
+			_totalSendSize += writeSize;
+			_remainSend = true;
+			return (0);
 		}
 		std::cout << RED << "#######response[" << fd << "] send!!!!!" << std::endl << RESET;
 		_totalSendSize += writeSize;

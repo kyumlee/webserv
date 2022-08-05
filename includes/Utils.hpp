@@ -32,7 +32,7 @@
 # define ON					1
 # define OFF				0
 
-# define CGI_BUFFER_SIZE 	65536
+# define CGI_BUFFER_SIZE 	50000
 # define LISTEN_BUFFER_SIZE 1024
 # define READ_BUFFER_SIZE	100000
 

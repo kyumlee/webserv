@@ -146,26 +146,26 @@ std::map<int, std::string>	Server::getServerErrorPages () const { return (_serve
 
 void						Server::setCgiEnv (int fd)
 {
-	_cgi.setBody(_response[fd]._body);
-	_cgi.setEnv("CONTENT_LENGTH", intToStr(_cgi.getBody().length()));
-	_cgi.setEnv("PATH_INFO", _response[fd]._path);
-	_cgi.setEnv("SERVER_PORT", "8000");
-	_cgi.setEnv("SERVER_PROTOCOL", "HTTP/1.1");
-	_cgi.setEnv("REDIRECT_STATUS", "200");
+	_cgi[fd].setBody(_response[fd]._body);
+	_cgi[fd].setEnv("CONTENT_LENGTH", intToStr(_cgi[fd].getBody().length()));
+	_cgi[fd].setEnv("PATH_INFO", _response[fd]._path);
+	_cgi[fd].setEnv("SERVER_PORT", "8000");
+	_cgi[fd].setEnv("SERVER_PROTOCOL", "HTTP/1.1");
+	_cgi[fd].setEnv("REDIRECT_STATUS", "200");
 	if (_response[fd]._xHeader != "")
-		_cgi.setEnv("HTTP_X_SECRET_HEADER_FOR_TEST", _response[fd]._xHeader);
+		_cgi[fd].setEnv("HTTP_X_SECRET_HEADER_FOR_TEST", _response[fd]._xHeader);
 }
 
 void						Server::initCgiEnv (int fd)
 {
-	_cgi.setName(_configCgi);
-	_cgi.setEnv("REDIRECT_STATUS", "200");
-	_cgi.setEnv("CONTENT_LENGTH", _response[fd].getContentLength());
-	_cgi.setEnv("CONTENT_TYPE", _response[fd].getContentType());
-	_cgi.setEnv("PATH_INFO", _response[fd].getPath());
-	_cgi.setEnv("REQUEST_METHOD", _response[fd]._method);
-	_cgi.setEnv("SERVER_PORT", intToStr(_response[fd].getListen().port));
-	_cgi.setEnv("SERVER_PROTOCOL", _response[fd].getHttpVersion());
+	_cgi[fd].setName(_configCgi);
+	_cgi[fd].setEnv("REDIRECT_STATUS", "200");
+	_cgi[fd].setEnv("CONTENT_LENGTH", _response[fd].getContentLength());
+	_cgi[fd].setEnv("CONTENT_TYPE", _response[fd].getContentType());
+	_cgi[fd].setEnv("PATH_INFO", _response[fd].getPath());
+	_cgi[fd].setEnv("REQUEST_METHOD", _response[fd]._method);
+	_cgi[fd].setEnv("SERVER_PORT", intToStr(_response[fd].getListen().port));
+	_cgi[fd].setEnv("SERVER_PROTOCOL", _response[fd].getHttpVersion());
 }
 
 LocationBlock				Server::selectLocationBlock (std::string requestURI, int fd)
@@ -296,7 +296,7 @@ void						Server::locationToServer (LocationBlock block, int fd)
 	if (block.getCGI() != "")
 	{
 		_configCgi = block.getCGI();
-		_cgi.setCgiExist(true);
+		_cgi[fd].setCgiExist(true);
 		initCgiEnv(fd);
 	}
 	
@@ -315,7 +315,7 @@ void						Server::resetRequest (int fd)
 	_bodyVecStartPos[fd] = 0;
 	_rnPos[fd] = 0;
 	_response[fd]._bodyVec.clear();
-	_cgi.setCgiExist(false);
+	_cgi[fd].setCgiExist(false);
 	_response[fd].getTotalResponse().clear();
 	_response[fd].setRemainSend(false);
 	_clientMaxBodySize = 0;
@@ -368,8 +368,7 @@ void						Server::eventRead(int fd)
 
 		if (_request[fd].find("\r\n") != std::string::npos && _checkedRequestLine[fd] == 0)
 		{
-			// XXX
-			if (_request[fd].at(0) == 'r' && _request[fd].at(1) == '\n')
+			if (_request[fd].at(0) == '\r' && _request[fd].at(1) == '\n')
 				_request[fd] = _request[fd].substr(2, _request[fd].length() - 2);
 			if (_request[fd].at(0) == '\n')
 				_request[fd] = _request[fd].substr(1, _request[fd].length() - 1);
@@ -551,11 +550,12 @@ void						Server::eventWrite(int fd)
 	{
 		if (_requestEnd[fd] == 1) 
 		{
-			int	verifyMethodRet = _response[fd].verifyMethod(fd, _requestEnd[fd], _cgi);
+			int	verifyMethodRet = _response[fd].verifyMethod(fd, _requestEnd[fd], _cgi[fd]);
 			if (verifyMethodRet == 1)
 				disconnectRequest(fd);
 			if (verifyMethodRet == 2)
 				resetRequest(fd);
+
 			if (_response[fd]._connection == "close")
 				disconnectRequest(fd);
 			else if (_response[fd].getRemainSend() == false)

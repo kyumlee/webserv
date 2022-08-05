@@ -40,7 +40,7 @@ class Server
 		std::string					_configCgi;
 
 		std::vector<LocationBlock>	_locations;
-		Cgi							_cgi;
+		std::map<int, Cgi>			_cgi;
 
 	public:
 		Server ();

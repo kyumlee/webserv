@@ -1,6 +1,6 @@
 # include "./../includes/Cgi.hpp"
 
-Cgi::Cgi () { _body = "body"; }
+Cgi::Cgi () { _body = "body"; _exists = false; }
 Cgi::Cgi (Cgi const& cgi) { (void)cgi; }
 Cgi::~Cgi () {}
 
@@ -63,7 +63,6 @@ std::string							Cgi::executeCgi (const std::string& scriptName)
 		dup2(fdIn, STDIN_FILENO);
 		//출력되는 값이 fdOut으로 들어가도록 만든다.
 		dup2(fdOut, STDOUT_FILENO);
-
 		execve(scriptName.c_str(), nll, env);
 
 		printErr("failed to execve");
