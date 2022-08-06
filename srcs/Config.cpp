@@ -35,15 +35,13 @@ int							Config::parse (std::string conf)
 
 int	Config::startServer ()
 {
-	for (std::vector<Server>::iterator it = _serverVec.begin(); it < _serverVec.end(); it++)
+	for (size_t i = 0; i < _serverVec.size(); i++)
 	{
-		if ((*it).initServerSocket() == 1)
+		
+		if (_serverVec[i].initServerSocket() == 1)
 		{
 			printErr("failed to init server");
-			std::cout << "fail server port: " << (*it).getListen().port << std::endl;
-			_serverVec.erase(it);
-			std::cout << "server vec size: " << _serverVec.size() << std::endl;
-			continue ;
+			_serverVec.erase(_serverVec.begin() + i);
 		}
 	}
 
@@ -88,18 +86,10 @@ int	Config::startServer ()
 
 			if (newEventsVec[i] == -1)
 			{
-				std::cout << "i port: " << _serverVec[i].getListen().port << ", iterator port : " << (*it).getListen().port << std::endl;
 				printErr(intToStr(_serverVec[i].getListen().port) + " port kevent error");
 				_serverVec.erase(it);
-				for (std::vector<int>::iterator newee = newEventsVec.begin(); newee != newEventsVec.end(); newee++)
-					std::cout << "newevents: " << (*newee) << std::endl;
 				newEventsVec.erase(newEventsVec.begin() + i);
-				for (std::vector<int>::iterator newee = newEventsVec.begin(); newee != newEventsVec.end(); newee++)
-					std::cout << "after newevents: " << (*newee) << std::endl;
 				currEventVec.erase(currEventVec.begin() + i);
-				// std::cout << (*_serverVec.erase(_serverVec.begin() + i)).getListen().port << std::endl;
-
-				std::cout << "after i port: " << _serverVec[i].getListen().port << ", iterator port : " << (*it).getListen().port << std::endl;
 				break ;
 			}
 			_serverVec[i].resetChangeList();
@@ -112,7 +102,6 @@ int	Config::startServer ()
 					if (_serverVec[i].eventError(currEventVec[i]->ident) == 1)
 					{
 						printErr(intToStr(_serverVec[i].getListen().port) + "stopping server due to event error");
-						// _serverVec.erase(it);
 						_serverVec.erase(_serverVec.begin() + i);
 						newEventsVec.erase(newEventsVec.begin() + i);
 						currEventVec.erase(currEventVec.begin() + i);

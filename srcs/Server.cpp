@@ -4,7 +4,43 @@ Server::Server () {}
 Server::Server (const Server& server) { (void)server; }
 Server::~Server () {}
 
-Server&						Server::operator= (const Server& server) { (void)server; return *this; }
+Server&						Server::operator= (const Server& server)
+{
+	_serverAddr = server._serverAddr;
+	_serverSocket = server._serverSocket;
+	_listen = server._listen;
+	_kq = server._kq;
+	_request = server._request;
+	_changeList = server._changeList;
+	for (size_t i = 0; i < LISTEN_BUFFER_SIZE; i++)
+		_eventList[i] = server._eventList[i];
+
+	_response = server._response;
+	_bodyCondition = server._bodyCondition;
+	_requestEnd = server._requestEnd;
+	_checkedRequestLine = server._checkedRequestLine;
+	_bodyStartPos = server._bodyStartPos;
+	_bodyEnd = server._bodyEnd;
+	_bodyVecSize = server._bodyVecSize;
+	_bodyVecTotalSize = server._bodyVecTotalSize;
+	_bodyVecStartPos = server._bodyVecStartPos;
+	_rnPos = server._rnPos;
+
+	_serverRoot = server._serverRoot;
+	_serverName = server._serverName;
+	_serverAllowedMethods = server._serverAllowedMethods;
+	_responseRoot = server._responseRoot;
+	_serverErrorPages = server._serverErrorPages;
+
+	_clientMaxBodySize = server._clientMaxBodySize;
+	_autoindex = server._autoindex;
+	_index = server._index;
+	_configCgi = server._configCgi;
+
+	_locations = server._locations;
+	_cgi = server._cgi;
+	return *this;
+}
 
 void						Server::changeEvents (std::vector<struct kevent>& changeList, uintptr_t ident, int16_t filter, uint16_t flags, uint32_t fflags, intptr_t data, void* udata)
 {
