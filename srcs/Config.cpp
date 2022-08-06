@@ -1,16 +1,29 @@
 #include "./../includes/Config.hpp"
 
-Config::Config () {}
-Config::Config (Config &conf) { _serverBlock = conf._serverBlock; }
+Config::Config()
+	: _serverBlock(),
+	_serverVec()
+{}
+
+Config::Config(Config &conf)
+	: _serverBlock(conf._serverBlock),
+	_serverVec(conf._serverVec)
+{}
+
 Config::~Config () {}
 
-Config						&Config::operator= (Config &conf) { _serverBlock = conf._serverBlock; return (*this); }
+Config						&Config::operator=(Config &conf)
+{
+	_serverBlock = conf._serverBlock;
+	_serverVec = conf._serverVec;
+	return (*this);
+}
 
-std::vector<ServerBlock>	Config::getServerBlocks () const { return (_serverBlock); }
+std::vector<ServerBlock>	Config::getServerBlocks() const { return (_serverBlock); }
 
-void						Config::addServerBlock (ServerBlock serverBlock) { _serverBlock.push_back(serverBlock); }
+void						Config::addServerBlock(ServerBlock serverBlock) { _serverBlock.push_back(serverBlock); }
 
-int							Config::parse (std::string conf)
+int							Config::parse(std::string conf)
 {
 	std::string					buf;
 	std::ifstream				f(conf);
@@ -25,7 +38,8 @@ int							Config::parse (std::string conf)
 
 	blocks = splitBlocks(buf, "server ");
 
-	for (size_t i = 0; i < blocks.size(); i++) {
+	for (size_t i = 0; i < blocks.size(); i++)
+	{
 		addServerBlock(ServerBlock(blocks[i]));
 		_serverBlock[i].parse();
 	}
@@ -69,13 +83,12 @@ int	Config::startServer ()
 			printErr("no executable server");
 			break ;
 		}
-		std::vector<Server>::iterator	it = _serverVec.begin();
 
 		struct timespec timeVal;
 		timeVal.tv_sec = 1;
 		timeVal.tv_nsec = 0;
 
-		for (size_t i = 0; i < _serverVec.size(); i++, it++)
+		for (size_t i = 0; i < _serverVec.size(); i++)
 		{
 			newEventsVec[i] = kevent(_serverVec[i].getKq(),
 				&_serverVec[i].getChangeList()[0],
@@ -87,7 +100,7 @@ int	Config::startServer ()
 			if (newEventsVec[i] == -1)
 			{
 				printErr(intToStr(_serverVec[i].getListen().port) + " port kevent error");
-				_serverVec.erase(it);
+				_serverVec.erase(_serverVec.begin() + i);
 				newEventsVec.erase(newEventsVec.begin() + i);
 				currEventVec.erase(currEventVec.begin() + i);
 				break ;

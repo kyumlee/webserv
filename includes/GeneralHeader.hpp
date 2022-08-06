@@ -6,21 +6,21 @@
 class GeneralHeader
 {
 	public:
-		GeneralHeader ();
-		GeneralHeader (const GeneralHeader& gh);
-		virtual ~GeneralHeader ();
+		GeneralHeader();
+		GeneralHeader(const GeneralHeader& gh);
+		virtual ~GeneralHeader();
 
-		GeneralHeader&	operator= (const GeneralHeader& gh);
+		GeneralHeader&	operator=(const GeneralHeader& gh);
+
+		std::string		getDate() const;
+		std::string		getConnection() const;
+		std::string		getTransferEncoding() const;
 	
-		void			setDate (const std::string& date = "");
-		void	 		setConnection (const std::string& connection = "");
-		void			setTransferEncoding (const std::string& transferEncoding = "");
+		void			setDate(const std::string& date = "");
+		void	 		setConnection(const std::string& connection = "");
+		void			setTransferEncoding(const std::string& transferEncoding = "");
 
-		std::string		getDate () const;
-		std::string		getConnection () const;
-		std::string		getTransferEncoding () const;
-
-		void			printGeneralHeader () const;
+		void			printGeneralHeader() const;
 
 	protected:
 		std::string	_date;

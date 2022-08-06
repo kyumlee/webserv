@@ -1,10 +1,72 @@
 #include "./../includes/Server.hpp"
 
-Server::Server () {}
-Server::Server (const Server& server) { (void)server; }
-Server::~Server () {}
+Server::Server()
+	: _serverAddr(),
+	_serverSocket(),
+	_listen(),
+	_kq(),
+	_request(),
+	_changeList(),
+	_eventList(),
+	_response(),
+	_bodyCondition(),
+	_requestEnd(),
+	_checkedRequestLine(),
+	_bodyStartPos(),
+	_bodyEnd(),
+	_bodyVecSize(),
+	_bodyVecTotalSize(),
+	_bodyVecStartPos(),
+	_rnPos(),
+	_serverRoot(),
+	_serverName(),
+	_serverAllowedMethods(),
+	_responseRoot(),
+	_serverErrorPages(),
+	_clientMaxBodySize(),
+	_autoindex(),
+	_index(),
+	_configCgi(),
+	_locations(),
+	_cgi()
+{}
 
-Server&						Server::operator= (const Server& server)
+Server::Server (const Server& server)
+	: _serverAddr(server._serverAddr),
+	_serverSocket(server._serverSocket),
+	_listen(server._listen),
+	_kq(server._kq),
+	_request(server._request),
+	_changeList(server._changeList),
+	_response(server._response),
+	_bodyCondition(server._bodyCondition),
+	_requestEnd(server._requestEnd),
+	_checkedRequestLine(server._checkedRequestLine),
+	_bodyStartPos(server._bodyStartPos),
+	_bodyEnd(server._bodyEnd),
+	_bodyVecSize(server._bodyVecSize),
+	_bodyVecTotalSize(server._bodyVecTotalSize),
+	_bodyVecStartPos(server._bodyVecStartPos),
+	_rnPos(server._rnPos),
+	_serverRoot(server._serverRoot),
+	_serverName(server._serverName),
+	_serverAllowedMethods(server._serverAllowedMethods),
+	_responseRoot(server._responseRoot),
+	_serverErrorPages(server._serverErrorPages),
+	_clientMaxBodySize(server._clientMaxBodySize),
+	_autoindex(server._autoindex),
+	_index(server._index),
+	_configCgi(server._configCgi),
+	_locations(server._locations),
+	_cgi(server._cgi)
+{
+	for (size_t i = 0; i < LISTEN_BUFFER_SIZE; i++)
+		_eventList[i] = server._eventList[i];
+}
+
+Server::~Server() {}
+
+Server&						Server::operator=(const Server& server)
 {
 	_serverAddr = server._serverAddr;
 	_serverSocket = server._serverSocket;
@@ -42,7 +104,7 @@ Server&						Server::operator= (const Server& server)
 	return *this;
 }
 
-void						Server::changeEvents (std::vector<struct kevent>& changeList, uintptr_t ident, int16_t filter, uint16_t flags, uint32_t fflags, intptr_t data, void* udata)
+void						Server::changeEvents(std::vector<struct kevent>& changeList, uintptr_t ident, int16_t filter, uint16_t flags, uint32_t fflags, intptr_t data, void* udata)
 {
 	struct kevent	tempEvent;
 
@@ -50,7 +112,7 @@ void						Server::changeEvents (std::vector<struct kevent>& changeList, uintptr_
 	changeList.push_back(tempEvent);
 }
 
-void						Server::disconnectRequest (int fd)
+void						Server::disconnectRequest(int fd)
 {
 	std::cout << "request disconnected: " << fd << std::endl << std::endl << std::endl;
 	resetRequest(fd);
@@ -58,13 +120,13 @@ void						Server::disconnectRequest (int fd)
 	_request.erase(fd);
 }
 
-void						Server::checkConnection (int fd)
+void						Server::checkConnection(int fd)
 {
 	if (_response[fd].getConnection() == "close")
 		disconnectRequest(fd);
 }
 
-int							Server::initListen (const std::string& hostPort)
+int							Server::initListen(const std::string& hostPort)
 {
 	if (setListen(hostPort, &_listen) == 1)
 		return (printErr("failed to listen"));
@@ -75,7 +137,7 @@ int							Server::initListen (const std::string& hostPort)
 	return (0);
 }
 
-int							Server::initServerSocket ()
+int							Server::initServerSocket()
 {	int	serverSocket = socket(PF_INET, SOCK_STREAM, 0);
 	if (serverSocket == -1)
 		return (printErr("failed to init server"));
@@ -104,7 +166,7 @@ int							Server::initServerSocket ()
 	return (0);
 }
 
-int							Server::eventError (int fd)
+int							Server::eventError(int fd)
 {
 	if (fd == _serverSocket)
 		return (printErr("socket error"));
@@ -117,7 +179,7 @@ int							Server::eventError (int fd)
 	return (0);
 }
 
-void						Server::requestAccept ()
+void						Server::requestAccept()
 {
 	int	requestSocket;
 	if ((requestSocket = accept(_serverSocket, NULL, NULL)) == -1)
@@ -150,12 +212,27 @@ void						Server::requestAccept ()
 	_response[requestSocket].setSendStartPos(0);
 }
 
-void						Server::setServerName (const std::string& name) { _serverName = name; }
-void						Server::setServerAllowedMethods (const std::vector<std::string>& allowedMethods) { _serverAllowedMethods = allowedMethods; }
-void						Server::setResponseRoot (const std::string& root) { _responseRoot = root; }
-void						Server::setServerErrorPages (const int& code, const std::string& html) { _serverErrorPages[code] = html; }
-void						Server::setServerErrorPages (const std::map<int, std::string>& html) { _serverErrorPages = html; }
-void						Server::initServerErrorPages ()
+std::string					Server::getServerName() const { return (_serverName); }
+std::vector<std::string>	Server::getServerAllowedMethods() const { return (_serverAllowedMethods); }
+std::string					Server::getResponseRoot() const { return (_responseRoot); }
+std::map<int, std::string>	Server::getServerErrorPages() const { return (_serverErrorPages); }
+t_listen					Server::getListen() const { return (_listen); }
+struct sockaddr_in			Server::getServerAddr() const { return (_serverAddr); }
+int							Server::getServerSocket() const { return (_serverSocket); }
+int							Server::getKq() { return (_kq); }
+std::map<int, std::string>	Server::getRequest() { return (_request); }
+std::vector<struct kevent>	Server::getChangeList() { return (_changeList); }
+struct kevent&				Server::getEventList(int index) { return (_eventList[index]); }
+struct kevent*				Server::getEventList() { return (_eventList); }
+void						Server::resetChangeList() { _changeList.clear(); }
+std::vector<LocationBlock>	Server::getLocations() { return (_locations); }
+
+void						Server::setServerName(const std::string& name) { _serverName = name; }
+void						Server::setServerAllowedMethods(const std::vector<std::string>& allowedMethods) { _serverAllowedMethods = allowedMethods; }
+void						Server::setResponseRoot(const std::string& root) { _responseRoot = root; }
+void						Server::setServerErrorPages(const int& code, const std::string& html) { _serverErrorPages[code] = html; }
+void						Server::setServerErrorPages(const std::map<int, std::string>& html) { _serverErrorPages = html; }
+void						Server::initServerErrorPages()
 {
 	setServerErrorPages(Bad_Request, "400.html");
 	setServerErrorPages(Forbidden, "403.html");
@@ -164,29 +241,14 @@ void						Server::initServerErrorPages ()
 	setServerErrorPages(Payload_Too_Large, "413.html");
 	setServerErrorPages(Internal_Server_Error, "500.html");
 }
-void						Server::setServerRoot (const std::string& root) { _serverRoot = root; }
-void						Server::setClientMaxBodySize (const size_t& size) { _clientMaxBodySize = size; }
-void						Server::setAutoindex (const int& autoindex) { _autoindex = autoindex; }
-void						Server::setIndex (const std::vector<std::string>& index) { _index = index; }
+void						Server::setServerRoot(const std::string& root) { _serverRoot = root; }
+void						Server::setClientMaxBodySize(const size_t& size) { _clientMaxBodySize = size; }
+void						Server::setAutoindex(const int& autoindex) { _autoindex = autoindex; }
+void						Server::setIndex(const std::vector<std::string>& index) { _index = index; }
 
-std::string					Server::getServerName () const { return (_serverName); }
-std::vector<std::string>	Server::getServerAllowedMethods () const { return (_serverAllowedMethods); }
-std::string					Server::getResponseRoot () const { return (_responseRoot); }
-std::map<int, std::string>	Server::getServerErrorPages () const { return (_serverErrorPages); }
-t_listen					Server::getListen () const { return (_listen); }
-struct sockaddr_in			Server::getServerAddr () const { return (_serverAddr); }
-int							Server::getServerSocket () const { return (_serverSocket); }
-int							Server::getKq () { return (_kq); }
-std::map<int, std::string>	Server::getRequest () { return (_request); }
-std::vector<struct kevent>	Server::getChangeList () { return (_changeList); }
-struct kevent&				Server::getEventList (int index) { return (_eventList[index]); }
-struct kevent*				Server::getEventList () { return (_eventList); }
-void						Server::resetChangeList () { _changeList.clear(); }
-std::vector<LocationBlock>	Server::getLocations () { return (_locations); }
-void						Server::addLocation (LocationBlock& lb)
-{ _locations.push_back(lb); }
+void						Server::addLocation(LocationBlock& lb) { _locations.push_back(lb); }
 
-void						Server::setCgiEnv (int fd)
+void						Server::setCgiEnv(int fd)
 {
 	_cgi[fd].setBody(_response[fd].getBody());
 	_cgi[fd].setEnv("CONTENT_LENGTH", intToStr(_cgi[fd].getBody().length()));
@@ -198,7 +260,7 @@ void						Server::setCgiEnv (int fd)
 		_cgi[fd].setEnv("HTTP_X_SECRET_HEADER_FOR_TEST", _response[fd].getXHeader());
 }
 
-void						Server::initCgiEnv (int fd)
+void						Server::initCgiEnv(int fd)
 {
 	_cgi[fd].setName(_configCgi);
 	_cgi[fd].setEnv("CONTENT_LENGTH", _response[fd].getContentLength());
@@ -209,7 +271,7 @@ void						Server::initCgiEnv (int fd)
 	_cgi[fd].setEnv("SERVER_PROTOCOL", _response[fd].getHttpVersion());
 }
 
-LocationBlock				Server::selectLocationBlock (std::string requestURI)
+LocationBlock				Server::selectLocationBlock(std::string requestURI)
 {
 	std::vector<LocationBlock>	locationBlocks;
 	std::vector<std::string>	requestURIvec;
@@ -285,7 +347,7 @@ LocationBlock				Server::selectLocationBlock (std::string requestURI)
 	return (locationBlocks[ret]);
 }
 
-void						Server::locationToServer (LocationBlock block, int fd)
+void						Server::locationToServer(LocationBlock block, int fd)
 {
 	if (block.empty() == true)
 		return ;
@@ -318,10 +380,9 @@ void						Server::locationToServer (LocationBlock block, int fd)
 		_cgi[fd].setCgiExist(true);
 		initCgiEnv(fd);
 	}
-	
 }
 
-void						Server::resetRequest (int fd)
+void						Server::resetRequest(int fd)
 {
 	_request[fd].clear();
 	_requestEnd[fd] = 0;
@@ -375,7 +436,7 @@ void						Server::eventRead(int fd)
 			_requestEnd[fd] = 1;
 			_request[fd] = _request[fd].substr(0, _bodyStartPos[fd] + _response[fd].getBodySize());
 		}
-		
+
 		if (_request[fd] == "\r\n" && _checkedRequestLine[fd] == 0)
 		{
 			_request[fd].clear();
@@ -572,4 +633,3 @@ void						Server::eventWrite(int fd)
 		}
 	}
 }
-

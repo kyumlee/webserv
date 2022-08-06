@@ -5,6 +5,59 @@
 
 class Server
 {
+	public:
+		Server();
+		Server(const Server& server);
+		~Server();
+
+		Server&						operator=(const Server& server);
+		void						changeEvents(std::vector<struct kevent>& changeList, uintptr_t ident, int16_t filter, uint16_t flags, uint32_t fflags, intptr_t data, void* udata);
+
+		void						disconnectRequest(int fd);
+		void						checkConnection(int fd);
+		int							initListen(const std::string& host_port);
+		int							initServerSocket();
+		int							eventError(int fd);
+		void						requestAccept();
+
+		std::string					getServerName() const;
+		std::vector<std::string>	getServerAllowedMethods() const;
+		std::string					getResponseRoot() const;
+		std::map<int, std::string>	getServerErrorPages() const;
+		t_listen					getListen() const;
+		struct sockaddr_in			getServerAddr() const;
+		int							getServerSocket() const;
+		int							getKq();
+		std::map<int, std::string>	getRequest();
+		std::vector<struct kevent>	getChangeList();
+		void						resetChangeList();
+		struct kevent&				getEventList(int index);
+		struct kevent*				getEventList();
+		std::vector<LocationBlock>	getLocations();
+
+		void						setServerName(const std::string& name);
+		void						setServerAllowedMethods(const std::vector<std::string>& allwedMethods);
+		void						setResponseRoot(const std::string& root);
+		void						setServerErrorPages(const int& code, const std::string& html);
+		void						setServerErrorPages(const std::map<int, std::string>& html);
+		void						initServerErrorPages();
+		void						setServerRoot(const std::string& root);
+		void						setClientMaxBodySize(const size_t& size);
+		void						setAutoindex(const int& autoindex);
+		void						setIndex(const std::vector<std::string>& index);
+		void						addLocation(LocationBlock& lb);
+
+		void						setCgiEnv(int fd);
+		void						initCgiEnv(int fd);
+
+		LocationBlock				selectLocationBlock(std::string requestURI);
+		void						locationToServer(LocationBlock block, int fd);
+
+		void						resetRequest(int fd);
+
+		void						eventRead(int fd);
+		void						eventWrite(int fd);
+
 	private:
 		struct sockaddr_in			_serverAddr;
 		int							_serverSocket;
@@ -38,66 +91,6 @@ class Server
 
 		std::vector<LocationBlock>	_locations;
 		std::map<int, Cgi>			_cgi;
-
-	public:
-		Server ();
-		Server (const Server& server);
-		~Server ();
-
-		Server&						operator= (const Server& server);
-		void						changeEvents (std::vector<struct kevent>& changeList, uintptr_t ident, int16_t filter, uint16_t flags, uint32_t fflags, intptr_t data, void* udata);
-
-		void						disconnectRequest (int fd);
-
-		void						checkConnection (int fd);
-
-		int							initListen (const std::string& host_port);
-
-		int							initServerSocket ();
-
-		int							eventError (int fd);
-
-		void						requestAccept ();
-
-		void						setServerName (const std::string& name);
-		void						setServerAllowedMethods (const std::vector<std::string>& allwedMethods);
-		void						setResponseRoot (const std::string& root);
-		void						setServerErrorPages (const int& code, const std::string& html);
-		void						setServerErrorPages (const std::map<int, std::string>& html);
-		void						setServerRoot (const std::string& root);
-		void						setClientMaxBodySize (const size_t& size);
-		void						setAutoindex (const int& autoindex);
-		void						setIndex (const std::vector<std::string>& index);
-
-		void						initServerErrorPages ();
-
-		std::string					getServerName () const;
-		std::vector<std::string>	getServerAllowedMethods () const;
-		std::string					getResponseRoot () const;
-		std::map<int, std::string>	getServerErrorPages () const;
-		t_listen					getListen () const;
-		struct sockaddr_in			getServerAddr () const;
-		int							getServerSocket () const;
-		int							getKq ();
-		std::map<int, std::string>	getRequest ();
-		std::vector<struct kevent>	getChangeList ();
-		void						resetChangeList ();
-		struct kevent&				getEventList (int index);
-		struct kevent*				getEventList ();
-		std::vector<LocationBlock>	getLocations ();
-		void						addLocation (LocationBlock& lb);
-
-		void						setCgiEnv (int fd);
-
-		void						initCgiEnv (int fd);
-
-		LocationBlock				selectLocationBlock (std::string requestURI);
-		void						locationToServer (LocationBlock block, int fd);
-
-		void						resetRequest (int fd);
-
-		void						eventRead (int fd);
-		void						eventWrite (int fd);
 };
 
 #endif

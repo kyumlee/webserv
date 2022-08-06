@@ -1,74 +1,70 @@
 #include "./../includes/ResponseHeader.hpp"
 
-ResponseHeader::ResponseHeader () {}
-ResponseHeader::ResponseHeader (const ResponseHeader& rh) { (void)rh; }
-ResponseHeader::~ResponseHeader () {}
+ResponseHeader::ResponseHeader()
+	: _server(),
+	_wwwAuthenticate(),
+	_retryAfter(),
+	_lastModified(),
+	_location(),
+	_errorMap(),
+	_errorHtml()
+{}
 
-ResponseHeader&				ResponseHeader::operator= (const ResponseHeader& rh)
+ResponseHeader::ResponseHeader(const ResponseHeader& rh)
+	: _server(rh._server),
+	_wwwAuthenticate(rh._wwwAuthenticate),
+	_retryAfter(rh._retryAfter),
+	_lastModified(rh._lastModified),
+	_location(rh._location),
+	_errorMap(rh._errorMap),
+	_errorHtml(rh._errorHtml)
+{}
+
+ResponseHeader::~ResponseHeader() {}
+
+ResponseHeader&				ResponseHeader::operator=(const ResponseHeader& rh)
 {
-	(void)rh;
+	_server = rh._server;
+	_wwwAuthenticate = rh._wwwAuthenticate;
+	_retryAfter = rh._retryAfter;
+	_lastModified = rh._lastModified;
+	_location = rh._location;
+	_errorMap = rh._errorMap;
+	_errorHtml = rh._errorHtml;
 	return (*this);
 }
 
-void						ResponseHeader::setErrorHtml (std::map<int, std::string> html)
+std::string					ResponseHeader::getServer() const { return (_server); }
+std::string 				ResponseHeader::getRetryAfter() const { return (_retryAfter); }
+std::string					ResponseHeader::getLastModified() const { return (_lastModified); }
+std::string					ResponseHeader::getLocation() const { return (_location); }
+std::map<int, std::string>	ResponseHeader::getErrorMap() const { return (_errorMap); }
+std::map<int, std::string>	ResponseHeader::getErrorHtml() const { return (_errorHtml); }
+
+std::string					ResponseHeader::getStatusMessage(int code)
 {
-	_errorHtml = html;
-	changeHtmlRelativePath();
+	if (_errorMap.find(code) != _errorMap.end())
+		return (_errorMap[code]);
+
+	return ("error code not found");
 }
 
-void						ResponseHeader::changeHtmlRelativePath ()
-{
-	for (std::map<int, std::string>::iterator it = _errorHtml.begin(); it != _errorHtml.end(); it++)
-	{
-		if (it->second == "400.html")
-			it->second = BAD_REQUEST_HTML;
-		else if (it->second == "403.html")
-			it->second = FORBIDDEN_HTML;
-		else if (it->second == "404.html")
-			it->second = NOT_FOUND_HTML;
-		else if (it->second == "405.html")
-			it->second = NOT_ALLOWED_HTML;
-		else if (it->second == "413.html")
-			it->second = PAYLOAD_TOO_LARGE_HTML;
-		else if (it->second == "500.html")
-			it->second = INTERNAL_SERVER_ERROR_HTML;
-		else
-			it->second = DEFAULT_HTML;
-	}
-}
-
-void						ResponseHeader::initErrorMap ()
-{
-	_errorMap[Continue] = "Continue";
-	_errorMap[OK] = "OK";
-	_errorMap[Created] = "Created";
-	_errorMap[No_Content] = "No Content";
-	_errorMap[Bad_Request] = "Bad Request";
-	_errorMap[Forbidden] = "Forbidden";
-	_errorMap[Not_Found] = "Not Found";
-	_errorMap[Method_Not_Allowed] = "Not Allowed";
-	_errorMap[Payload_Too_Large] = "Payload Too Large";
-	_errorMap[Internal_Server_Error] = "Internal Server Error";
-}
-
-std::string					ResponseHeader::getHeader ()
+std::string					ResponseHeader::getHeader()
 {
 	std::string	header;
 
 	setHeader();
-
 	header = _httpVersion + " " + intToStr(_code) + " " + getStatusMessage(_code) + "\r\n";
 	header += writeHeader(); 
 
 	return (header);
 }
 
-std::string					ResponseHeader::writeHeader ()
+std::string					ResponseHeader::writeHeader()
 {
 	std::string	header = "";
 	if (_allow != "")
 		header += "Allow: " + _allow + "\r\n";
-	
 	
 	if (_contentLanguage != "")
 		header += "Content-Language: " + _contentLanguage + "\r\n";
@@ -105,15 +101,48 @@ std::string					ResponseHeader::writeHeader ()
 	return (header);
 }
 
-std::string					ResponseHeader::getStatusMessage (int code)
+void						ResponseHeader::setErrorHtml(std::map<int, std::string> html)
 {
-	if (_errorMap.find(code) != _errorMap.end())
-		return (_errorMap[code]);
-
-	return ("error code not found");
+	_errorHtml = html;
+	changeHtmlRelativePath();
 }
 
-void						ResponseHeader::initRequest ()
+void						ResponseHeader::changeHtmlRelativePath()
+{
+	for (std::map<int, std::string>::iterator it = _errorHtml.begin(); it != _errorHtml.end(); it++)
+	{
+		if (it->second == "400.html")
+			it->second = BAD_REQUEST_HTML;
+		else if (it->second == "403.html")
+			it->second = FORBIDDEN_HTML;
+		else if (it->second == "404.html")
+			it->second = NOT_FOUND_HTML;
+		else if (it->second == "405.html")
+			it->second = NOT_ALLOWED_HTML;
+		else if (it->second == "413.html")
+			it->second = PAYLOAD_TOO_LARGE_HTML;
+		else if (it->second == "500.html")
+			it->second = INTERNAL_SERVER_ERROR_HTML;
+		else
+			it->second = DEFAULT_HTML;
+	}
+}
+
+void						ResponseHeader::initErrorMap()
+{
+	_errorMap[Continue] = "Continue";
+	_errorMap[OK] = "OK";
+	_errorMap[Created] = "Created";
+	_errorMap[No_Content] = "No Content";
+	_errorMap[Bad_Request] = "Bad Request";
+	_errorMap[Forbidden] = "Forbidden";
+	_errorMap[Not_Found] = "Not Found";
+	_errorMap[Method_Not_Allowed] = "Not Allowed";
+	_errorMap[Payload_Too_Large] = "Payload Too Large";
+	_errorMap[Internal_Server_Error] = "Internal Server Error";
+}
+
+void						ResponseHeader::initRequest()
 {
 	_date = "";
 	_connection = "";
@@ -149,13 +178,13 @@ void						ResponseHeader::initRequest ()
 	_bodySize = 0;
 }
 
-void						ResponseHeader::resetRequest ()
+void						ResponseHeader::resetRequest()
 {
 	initRequest();
 	_server = "";
 }
 
-void						ResponseHeader::setHeader ()
+void						ResponseHeader::setHeader()
 {
 	setDate();
 	setConnection(_connection);
@@ -166,13 +195,12 @@ void						ResponseHeader::setHeader ()
 	setContentLanguage(_contentLanguage);
 	setContentEncoding(_contentEncoding);
 
-	
 	setServer(_server);
 	setLastModified(_path);
 	setLocation(_code, _path);
 }
 
-void						ResponseHeader::setServer (const std::string& server)
+void						ResponseHeader::setServer(const std::string& server)
 {
 	if (server == "")
 		_server = "Webserv/1.0 (Unix)";
@@ -180,7 +208,7 @@ void						ResponseHeader::setServer (const std::string& server)
 		_server = server;
 }
 
-void						ResponseHeader::setLastModified (const std::string& path)
+void						ResponseHeader::setLastModified(const std::string& path)
 {
 	char		buf[100];
 	struct stat	fileStat;
@@ -195,20 +223,13 @@ void						ResponseHeader::setLastModified (const std::string& path)
 	}
 }
 
-void						ResponseHeader::setLocation (int code, const std::string& path)
+void						ResponseHeader::setLocation(int code, const std::string& path)
 {
 	if (code == Created || code / 100 == 3)
 		_location = path;
 }
 
-std::string					ResponseHeader::getServer () const { return (_server); }
-std::string 				ResponseHeader::getRetryAfter () const { return (_retryAfter); }
-std::string					ResponseHeader::getLastModified () const { return (_lastModified); }
-std::string					ResponseHeader::getLocation () const { return (_location); }
-std::map<int, std::string>	ResponseHeader::getErrorMap () const { return (_errorMap); }
-std::map<int, std::string>	ResponseHeader::getErrorHtml () const { return (_errorHtml); }
-
-void						ResponseHeader::printResponseHeader ()
+void						ResponseHeader::printResponseHeader()
 {
 	std::cout << "server name: " << getServer() << std::endl;
 	std::cout << "retry after: " << getRetryAfter() << std::endl;

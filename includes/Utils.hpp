@@ -102,53 +102,53 @@ typedef struct s_listen
 	int						port;
 }							t_listen;
 
-int							printErr (std::string errMsg);
-std::vector<std::string>	split (std::string str, char delimiter = '\n');
-std::string					trim (std::string str);
-std::vector<std::string>	splitBlocks (std::string block, std::string type);
-std::pair<bool, size_t>		skipKey (std::string line, std::string str, std::string delimiter);
-bool						isNumber (std::string str);
-std::string					parseValue (std::string line, size_t pos, std::string delimiter);
-int							strToInt (std::string str);
-int							compareURIs (std::string URI, std::string request, int mod);
+int							printErr(std::string errMsg);
+std::vector<std::string>	split(std::string str, char delimiter = '\n');
+std::string					trim(std::string str);
+std::vector<std::string>	splitBlocks(std::string block, std::string type);
+std::pair<bool, size_t>		skipKey(std::string line, std::string str, std::string delimiter);
+bool						isNumber(std::string str);
+std::string					parseValue(std::string line, size_t pos, std::string delimiter);
+int							strToInt(std::string str);
+int							compareURIs(std::string URI, std::string request, int mod);
 
-int							pathIsFile (const std::string& path);
+int							pathIsFile(const std::string& path);
 
-std::string					setUri (const std::string& dirList, const std::string& dirName, const std::string& host, const int port);
-std::string					setHtml (const std::string& path, const std::string& lang, const std::string& charset, const std::string& h1, const std::string& host, const int port);
+std::string					setUri(const std::string& dirList, const std::string& dirName, const std::string& host, const int port);
+std::string					setHtml(const std::string& path, const std::string& lang, const std::string& charset, const std::string& h1, const std::string& host, const int port);
 
-int							setErrorPages (const std::string& errPages, std::map<int, std::string>* errMap);
+int							setErrorPages(const std::string& errPages, std::map<int, std::string>* errMap);
 
-std::string					intToStr (int code);
-std::string					sizetToStr (size_t code);
+std::string					intToStr(int code);
+std::string					sizetToStr(size_t code);
 
-void						printVec (std::vector<std::string> strVec);
-void						printSet (std::set<std::string> strSet);
-void						printErrmap (std::map<int, std::string> errmap);
+void						printVec(std::vector<std::string> strVec);
+void						printSet(std::set<std::string> strSet);
+void						printErrmap(std::map<int, std::string> errmap);
 
-int							compareEnd (const std::string& s1, const std::string& s2);
+int							compareEnd(const std::string& s1, const std::string& s2);
 
-std::string					findExtension (std::string& file);
-std::string					findFileName (const std::string& path);
-std::string					findFileType (const std::string& file);
-std::string					eraseFileType (const std::string& file);
+std::string					findExtension(std::string& file);
+std::string					findFileName(const std::string& path);
+std::string					findFileType(const std::string& file);
+std::string					eraseFileType(const std::string& file);
 
-std::string					strTrimChar (const std::string& str, char deleteChar = ' ');
-std::string					findHeaderValue (const std::string& header);
-std::string					strDeleteRN (const std::string& str);
+std::string					strTrimChar(const std::string& str, char deleteChar = ' ');
+std::string					findHeaderValue(const std::string& header);
+std::string					strDeleteRN(const std::string& str);
 
-int							isStrAlpha (const std::string& str);
-int							isStrUpper (const std::string& str);
+int							isStrAlpha(const std::string& str);
+int							isStrUpper(const std::string& str);
 
-int							makeHtml (const std::string& htmlName, int code, const std::string& codeStr, const std::string& serverName);
+int							makeHtml(const std::string& htmlName, int code, const std::string& codeStr, const std::string& serverName);
 
-bool						hostToInt (std::string host, t_listen* listen);
-int							setListen (std::string host, t_listen* listen);
-size_t						calExponent (const std::string& str);
+bool						hostToInt(std::string host, t_listen* listen);
+int							setListen(std::string host, t_listen* listen);
+size_t						calExponent(const std::string& str);
 
-int							checkHex (std::string& hex);
-size_t						hexToDecimal (std::string& hex);
+int							checkHex(std::string& hex);
+size_t						hexToDecimal(std::string& hex);
 
-void						printStr (const std::string& str, const std::string& response);
+void						printStr(const std::string& str, const std::string& response);
 
 #endif

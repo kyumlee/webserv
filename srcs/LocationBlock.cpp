@@ -1,6 +1,6 @@
 #include "./../includes/LocationBlock.hpp"
 
-LocationBlock::LocationBlock ()
+LocationBlock::LocationBlock()
 	: _block(),
 	_mod(NONE),
 	_uri(),
@@ -12,10 +12,11 @@ LocationBlock::LocationBlock ()
 	_index(),
 	_cgi(""),
 	_locations(),
-	_empty(true)
+	_empty(true),
+	_path()
 {}
 
-LocationBlock::LocationBlock (std::string block)
+LocationBlock::LocationBlock(std::string block)
 	: _block(block),
 	_mod(NONE),
 	_uri(),
@@ -27,10 +28,11 @@ LocationBlock::LocationBlock (std::string block)
 	_index(),
 	_cgi(""),
 	_locations(),
-	_empty(true)
+	_empty(true),
+	_path()
 {}
 
-LocationBlock::LocationBlock (const LocationBlock &lb)
+LocationBlock::LocationBlock(const LocationBlock &lb)
 	: _block(lb._block),
 	_mod(lb._mod),
 	_uri(lb._uri),
@@ -48,7 +50,7 @@ LocationBlock::LocationBlock (const LocationBlock &lb)
 
 LocationBlock::~LocationBlock() {}
 
-LocationBlock	&LocationBlock::operator= (const LocationBlock &lb)
+LocationBlock	&LocationBlock::operator=(const LocationBlock &lb)
 {
 	_block = lb._block;
 	_mod = lb._mod;
@@ -68,34 +70,34 @@ LocationBlock	&LocationBlock::operator= (const LocationBlock &lb)
 	return (*this);
 }
 
-std::string					LocationBlock::getBlock () const { return (_block); }
-int							LocationBlock::getMod () const { return (_mod); }
-std::string					LocationBlock::getURI () const { return (_uri); }
-int							LocationBlock::getClntSize () const { return (_clntSize); }
-std::vector<std::string>	LocationBlock::getMethods () const { return (_methods); }
-int							LocationBlock::getRedirect () const { return (_redirect); }
-std::string					LocationBlock::getRoot () const { return (_root); }
-int							LocationBlock::getAutoindex () const { return (_autoindex); }
-std::vector<std::string>	LocationBlock::getIndex () const { return (_index); }
-std::string					LocationBlock::getCGI () const { return (_cgi); }
-std::vector<LocationBlock>	LocationBlock::getLocationBlocks () const { return (_locations); }
+std::string					LocationBlock::getBlock() const { return (_block); }
+int							LocationBlock::getMod() const { return (_mod); }
+std::string					LocationBlock::getURI() const { return (_uri); }
+int							LocationBlock::getClntSize() const { return (_clntSize); }
+std::vector<std::string>	LocationBlock::getMethods() const { return (_methods); }
+int							LocationBlock::getRedirect() const { return (_redirect); }
+std::string					LocationBlock::getRoot() const { return (_root); }
+int							LocationBlock::getAutoindex() const { return (_autoindex); }
+std::vector<std::string>	LocationBlock::getIndex() const { return (_index); }
+std::string					LocationBlock::getCGI() const { return (_cgi); }
+std::vector<LocationBlock>	LocationBlock::getLocationBlocks() const { return (_locations); }
 bool						LocationBlock::empty() const { return (_empty); }
 std::string					LocationBlock::getPath() const { return (_path); }
 
-void						LocationBlock::setMod (int mod) { _mod = mod; }
-void						LocationBlock::setURI (std::string uri) { _uri = uri; }
-void						LocationBlock::setClntSize (int clntSize) { _clntSize = clntSize; }
-void						LocationBlock::setMethods (std::vector<std::string> methods) { _methods = methods; }
-void						LocationBlock::setRedirect (int redirection) { _redirect = redirection; }
-void						LocationBlock::setRoot (std::string root) { _root = root; }
-void						LocationBlock::setAutoindex (int autoindex) { _autoindex = autoindex; }
-void						LocationBlock::setIndex (std::vector<std::string> index) { _index = index; }
-void						LocationBlock::setCGI (std::string cgi) { _cgi = cgi; }
-void						LocationBlock::addLocationBlock (LocationBlock lc) { _locations.push_back(lc); }
-void						LocationBlock::setEmpty (bool empty) { _empty = empty; }
+void						LocationBlock::setMod(int mod) { _mod = mod; }
+void						LocationBlock::setURI(std::string uri) { _uri = uri; }
+void						LocationBlock::setClntSize(int clntSize) { _clntSize = clntSize; }
+void						LocationBlock::setMethods(std::vector<std::string> methods) { _methods = methods; }
+void						LocationBlock::setRedirect(int redirection) { _redirect = redirection; }
+void						LocationBlock::setRoot(std::string root) { _root = root; }
+void						LocationBlock::setAutoindex(int autoindex) { _autoindex = autoindex; }
+void						LocationBlock::setIndex(std::vector<std::string> index) { _index = index; }
+void						LocationBlock::setCGI(std::string cgi) { _cgi = cgi; }
+void						LocationBlock::addLocationBlock(LocationBlock lc) { _locations.push_back(lc); }
+void						LocationBlock::setEmpty(bool empty) { _empty = empty; }
 void						LocationBlock::setPath(const std::string& path) { _path = path; }
 
-int							LocationBlock::parseModMatch ()
+int							LocationBlock::parseModMatch()
 {
 	size_t	pos = 0, bracketPos = _block.find("{", 0);
 	size_t	end = _block.find("\n", 0);
@@ -130,7 +132,7 @@ int							LocationBlock::parseModMatch ()
 	return (0);
 }
 
-int							LocationBlock::parseClntSize ()
+int							LocationBlock::parseClntSize()
 {
 	std::pair<bool, size_t>	res = skipKey(_block, "client_max_body_size", ";");
 	int						clntSize;
@@ -148,7 +150,7 @@ int							LocationBlock::parseClntSize ()
 	return (0);
 }
 
-int							LocationBlock::parseMethods ()
+int							LocationBlock::parseMethods()
 {
 	std::string				methods;
 	std::pair<bool, size_t>	res = skipKey(_block, "allow_methods", ";");
@@ -171,7 +173,7 @@ int							LocationBlock::parseMethods ()
 	return (0);
 }
 
-int							LocationBlock::parseRoot ()
+int							LocationBlock::parseRoot()
 {
 	std::pair<bool, size_t>	res = skipKey(_block, "root", ";");
 
@@ -183,7 +185,7 @@ int							LocationBlock::parseRoot ()
 	return (0);
 }
 
-int							LocationBlock::parseAutoindex ()
+int							LocationBlock::parseAutoindex()
 {
 	std::string				is;
 	std::pair<bool, size_t>	res = skipKey(_block, "autoindex", ";");
@@ -199,7 +201,7 @@ int							LocationBlock::parseAutoindex ()
 	return (0);
 }
 
-int							LocationBlock::parseIndex ()
+int							LocationBlock::parseIndex()
 {
 	std::string				index;
 	std::pair<bool, size_t>	res = skipKey(_block, "\tindex", ";");
@@ -217,7 +219,7 @@ int							LocationBlock::parseIndex ()
 	return (0);
 }
 
-int							LocationBlock::parseCGI ()
+int							LocationBlock::parseCGI()
 {
 	std::pair<bool, size_t>	res = skipKey(_block, "cgi_pass", ";");
 
@@ -229,7 +231,7 @@ int							LocationBlock::parseCGI ()
 	return (0);
 }
 
-int							LocationBlock::parse ()
+int							LocationBlock::parse()
 {
 	std::vector<std::string>	locBlocks = splitBlocks(_block, "location ");
 
@@ -254,7 +256,7 @@ int							LocationBlock::parse ()
 	return (0);
 }
 
-void	LocationBlock::printLocationBlock ()
+void	LocationBlock::printLocationBlock()
 {
 	std::cout << "location_block : " << _block << std::endl;
 	std::cout << "location block mode : " << _mod << std::endl;

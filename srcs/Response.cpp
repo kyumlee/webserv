@@ -1,24 +1,42 @@
 # include "./../includes/Response.hpp"
 
-Response::Response () {}
-Response::Response (const Response& response) { (void)response; }
-Response::~Response () {}
+Response::Response()
+	: _remainSend(),
+	_totalSendSize(),
+	_sendStartPos(),
+	_totalResponse()
+{}
 
-Response&	Response::operator= (const Response& response) { (void)response; return (*this); }
+Response::Response (const Response& response)
+	: _remainSend(response._remainSend),
+	_totalSendSize(response._totalSendSize),
+	_sendStartPos(response._sendStartPos),
+	_totalResponse(response._totalResponse)
+{}
+Response::~Response() {}
 
-void		Response::setRemainSend (int value) { _remainSend = value; }
-void		Response::setTotalSendSize (size_t size) { _totalSendSize = size; }
-void		Response::setTotalResponse (const std::string& response) { _totalResponse = response; }
-void		Response::setSendStartPos (const size_t& startPos) { _sendStartPos = startPos; }
+Response&	Response::operator=(const Response& response)
+{
+	_remainSend = response._remainSend;
+	_totalSendSize = response._totalSendSize;
+	_sendStartPos = response._sendStartPos;
+	_totalResponse = response._totalResponse;
+	return (*this);
+}
 
-int			Response::getRemainSend () const { return (_remainSend); }
-size_t		Response::getTotalSendSize () const { return (_totalSendSize); }
-std::string	Response::getTotalResponse () const { return (_totalResponse); }
-size_t		Response::getSendStartPos () const { return (_sendStartPos); }
+int			Response::getRemainSend() const { return (_remainSend); }
+size_t		Response::getTotalSendSize() const { return (_totalSendSize); }
+std::string	Response::getTotalResponse() const { return (_totalResponse); }
+size_t		Response::getSendStartPos() const { return (_sendStartPos); }
 
-void		Response::initResponseValue () { _remainSend = false; }
+void		Response::setRemainSend(int value) { _remainSend = value; }
+void		Response::setTotalSendSize(size_t size) { _totalSendSize = size; }
+void		Response::setTotalResponse(const std::string& response) { _totalResponse = response; }
+void		Response::setSendStartPos(const size_t& startPos) { _sendStartPos = startPos; }
 
-int			Response::checkAllowedMethods ()
+void		Response::initResponseValue() { _remainSend = false; }
+
+int			Response::checkAllowedMethods()
 {
 
 	if (_possibleMethods.find(_method) != _possibleMethods.end() && _allowedMethods.find(_method) == _allowedMethods.end())
@@ -36,7 +54,7 @@ int			Response::checkAllowedMethods ()
 	return (0);
 }
 
-std::string	Response::responseErr ()
+std::string	Response::responseErr()
 {
 	if (_errorHtml.find(_code) != _errorHtml.end())
 		_path = _errorHtml[_code];
@@ -50,7 +68,7 @@ std::string	Response::responseErr ()
 	return (header);
 }
 
-int			Response::verifyMethod (int fd, int requestEnd, int autoindex, std::string index, Cgi& cgi)
+int			Response::verifyMethod(int fd, int requestEnd, int autoindex, std::string index, Cgi& cgi)
 {
 	int			error = 0, ret = 0;
 
@@ -146,7 +164,7 @@ int			Response::verifyMethod (int fd, int requestEnd, int autoindex, std::string
 	return (ret);
 }
 
-std::string	Response::execGET (std::string& path, int autoindex, std::string index)
+std::string	Response::execGET(std::string& path, int autoindex, std::string index)
 {
 	std::string			fileContent = "";
 	std::ifstream		file;
@@ -190,14 +208,14 @@ std::string	Response::execGET (std::string& path, int autoindex, std::string ind
 	return (fileContent);
 }
 
-std::string	Response::execHEAD (std::string& path, int autoindex, std::string index)
+std::string	Response::execHEAD(std::string& path, int autoindex, std::string index)
 {
 	std::string			fileContent = execGET(path, autoindex, index);
 	fileContent = fileContent.substr(0, getHeader().length());
 	return (fileContent);
 }
 
-std::string	Response::execPOST (const std::string& path, const std::string& body, Cgi& cgi)
+std::string	Response::execPOST(const std::string& path, const std::string& body, Cgi& cgi)
 {
 
 	std::ofstream	file;
@@ -259,7 +277,7 @@ std::string	Response::execPOST (const std::string& path, const std::string& body
 	return (fileContent);
 }
 
-std::string	Response::execPUT (const std::string& path, std::string& body)
+std::string	Response::execPUT(const std::string& path, std::string& body)
 {
 	std::ofstream	file;
 	std::string		fileContent;
@@ -294,7 +312,7 @@ std::string	Response::execPUT (const std::string& path, std::string& body)
 	return (fileContent);
 }
 
-std::string	Response::execDELETE (std::string& path)
+std::string	Response::execDELETE(std::string& path)
 {
 	std::string	fileContent;
 
@@ -317,7 +335,7 @@ std::string	Response::execDELETE (std::string& path)
 	return (fileContent);
 }
 
-std::string	Response::readHtml (const std::string& path)
+std::string	Response::readHtml(const std::string& path)
 {
 	std::ofstream			file;
 	std::stringstream		buf;
@@ -336,7 +354,7 @@ std::string	Response::readHtml (const std::string& path)
 		return (ERROR_HTML);
 }
 
-void		Response::printResponseValue ()
+void		Response::printResponseValue()
 {
 	std::cout << WHITE;
 	printGeneralHeader();

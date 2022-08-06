@@ -6,23 +6,23 @@
 class Cgi
 {
 	public:
-		Cgi ();
-		Cgi (Cgi const& cgi);
-		virtual ~Cgi ();
+		Cgi();
+		Cgi(Cgi const& cgi);
+		virtual ~Cgi();
 
-		Cgi&								operator= (Cgi const& cgi);
+		Cgi&								operator=(Cgi const& cgi);
 
-		void								setEnv (const std::string& key, const std::string& value);
-		void								setCgiExist (const int& exist);
-		void								setName (const std::string& name);
-		void								setBody (const std::string& body);
+		std::map<std::string, std::string>	getEnv() const;
+		int									getCgiExist() const;
+		std::string							getName() const;
+		std::string							getBody() const;
 
-		std::map<std::string, std::string>	getEnv () const;
-		int									getCgiExist () const;
-		std::string							getName () const;
-		std::string							getBody () const;
+		void								setEnv(const std::string& key, const std::string& value);
+		void								setCgiExist(const int& exist);
+		void								setName(const std::string& name);
+		void								setBody(const std::string& body);
 
-		std::string							executeCgi (const std::string& scriptName);
+		std::string							executeCgi(const std::string& scriptName);
 
 		void								printEnv();
 		void								initEnv();
@@ -32,7 +32,7 @@ class Cgi
 		int									_exists;
 		std::string							_name;
 		std::string							_body;
-		char**								envToChar () const;
+		char**								envToChar() const;
 };
 
 #endif

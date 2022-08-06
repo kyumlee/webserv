@@ -1,21 +1,25 @@
 #include "./../includes/Utils.hpp"
 
-int							printErr (std::string errMsg) {
+int							printErr(std::string errMsg)
+{
 	std::cerr << "ERROR: " << errMsg << std::endl;
 	return (1);
 }
 
-std::vector<std::string>	split (std::string str, char delimiter) {
+std::vector<std::string>	split(std::string str, char delimiter)
+{
 	size_t						startPos = 0, endPos;
 	std::vector<std::string>	ret;
 	std::string					token;
 
-	if (str.find(delimiter, 0) == std::string::npos) {
+	if (str.find(delimiter, 0) == std::string::npos)
+	{
 		ret.push_back(str);
 		return (ret);
 	}
 
-	while ((endPos = str.find(delimiter, startPos)) != std::string::npos) {
+	while ((endPos = str.find(delimiter, startPos)) != std::string::npos)
+	{
 		token = str.substr(startPos, endPos - startPos);
 		startPos = endPos + 1;
 		ret.push_back(token);
@@ -26,7 +30,8 @@ std::vector<std::string>	split (std::string str, char delimiter) {
 	return (ret);
 }
 
-std::string					trim (std::string str) {
+std::string					trim(std::string str)
+{
 	size_t		startPos = 0, endPos = str.length() - 1;
 
 	while (std::isspace(str[startPos]))
@@ -37,10 +42,12 @@ std::string					trim (std::string str) {
 	return (str.substr(startPos, endPos - startPos + 1));
 }
 
-size_t						skipBlock (std::string block) {
+size_t						skipBlock(std::string block)
+{
 	size_t	i = 1;
 
-	while (block[i] != '}') {
+	while (block[i] != '}')
+	{
 		if (block[i] == '{')
 			i += skipBlock(&block[i]);
 		else
@@ -51,7 +58,8 @@ size_t						skipBlock (std::string block) {
 	return (i);
 }
 
-std::vector<std::string>	splitBlocks (std::string block, std::string type) {
+std::vector<std::string>	splitBlocks(std::string block, std::string type)
+{
 	std::vector<std::string>	ret;
 	size_t						startPos = 0, endPos = 0;
 
@@ -63,13 +71,15 @@ std::vector<std::string>	splitBlocks (std::string block, std::string type) {
 			startPos++;
 		endPos = startPos;
 
-		if (type == "location ") {
+		if (type == "location ")
+		{
 			while (block[endPos] != '{')
 				endPos++;
 			endPos++;
 		}
 
-		while (block[endPos] != '}') {
+		while (block[endPos] != '}')
+		{
 			if (block[endPos] == '{')
 				endPos += skipBlock(&block[endPos]);
 			else
@@ -84,7 +94,8 @@ std::vector<std::string>	splitBlocks (std::string block, std::string type) {
 	return (ret);
 }
 
-std::pair<bool, size_t>		skipKey (std::string line, std::string key, std::string delimiter) {
+std::pair<bool, size_t>		skipKey(std::string line, std::string key, std::string delimiter)
+{
 	size_t	pos = line.find(key, 0);
 	size_t	scPos = line.find(delimiter, pos);
 	size_t	nlPos = line.find("\n", pos);
@@ -105,20 +116,24 @@ std::pair<bool, size_t>		skipKey (std::string line, std::string key, std::string
 	return (std::make_pair(true, pos));
 }
 
-bool						isNumber (std::string str) {
-	for (size_t i = 0; i < str.size(); i++) {
+bool						isNumber(std::string str)
+{
+	for (size_t i = 0; i < str.size(); i++)
+	{
 		if (!std::isdigit(str[i]))
 			return (0);
 	}
 	return (1);
 }
 
-std::string					parseValue (std::string line, size_t pos, std::string delimiter) {
+std::string					parseValue(std::string line, size_t pos, std::string delimiter)
+{
 	size_t	scPos = line.find(delimiter, pos);
 	return (trim(line.substr(pos, scPos - pos)));
 }
 
-int							strToInt (std::string str) {
+int							strToInt(std::string str)
+{
 	int					ret;
 	std::stringstream	ssInt(str);
 
@@ -127,7 +142,7 @@ int							strToInt (std::string str) {
 	return (ret);
 }
 
-std::string					intToStr (int code)
+std::string					intToStr(int code)
 {
 	std::stringstream	ret;
 	ret << code;
@@ -135,7 +150,7 @@ std::string					intToStr (int code)
 	return (ret.str());
 }
 
-std::string					sizetToStr (size_t code)
+std::string					sizetToStr(size_t code)
 {
 	std::stringstream	ret;
 	ret << code;
@@ -143,7 +158,7 @@ std::string					sizetToStr (size_t code)
 	return (ret.str());
 }
 
-int							compareURIs (std::string URI, std::string request, int mod)
+int							compareURIs(std::string URI, std::string request, int mod)
 {
 	size_t		pos = URI.find('/') + 1;
 	char		start;
@@ -211,8 +226,7 @@ std::string					setUri(const std::string& dirList, const std::string& dirName,
 	return (ss.str());
 }
 
-std::string					setHtml(const std::string& path, const std::string& lang,
-	const std::string& charset, const std::string& h1, const std::string& host, const int port)
+std::string					setHtml(const std::string& path, const std::string& lang, const std::string& charset, const std::string& h1, const std::string& host, const int port)
 
 {
 	DIR*	dir = opendir(path.c_str());
@@ -422,7 +436,7 @@ int							makeHtml(const std::string& htmlName, int code, const std::string& cod
 	return (0);
 }
 
-bool					hostToInt (std::string host, t_listen* listen)
+bool					hostToInt(std::string host, t_listen* listen)
 {
 	size_t			sep = 0, start = 0;
 	unsigned int	n, ret = 0;
@@ -462,7 +476,7 @@ bool					hostToInt (std::string host, t_listen* listen)
 	return (0);
 }
 
-int						setListen (std::string strHost, t_listen* listen)
+int						setListen(std::string strHost, t_listen* listen)
 {
 	if (strHost == "")
 		return (printErr("host header doesn't exist"));
@@ -550,7 +564,7 @@ size_t						hexToDecimal(std::string& hex)
 	return (ret);
 }
 
-void						printStr (const std::string& str, const std::string& response)
+void						printStr(const std::string& str, const std::string& response)
 {
 	if (response == "response")
 		std::cout << YELLOW << "============response============" << std::endl << RESET;

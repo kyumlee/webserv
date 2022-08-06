@@ -6,39 +6,37 @@
 class ResponseHeader : public RequestHeader
 {
 	public:
-		ResponseHeader ();
-		ResponseHeader (const ResponseHeader& rh);
-		virtual ~ResponseHeader ();
+		ResponseHeader();
+		ResponseHeader(const ResponseHeader& rh);
+		virtual ~ResponseHeader();
 
-		ResponseHeader&				operator= (const ResponseHeader& rh);
+		ResponseHeader&				operator=(const ResponseHeader& rh);
 
-		void						initErrorHtml ();
-		void						setErrorHtml (int code, std::string html);
-		void						setErrorHtml (std::map<int, std::string> html);
-		void						changeHtmlRelativePath ();
-		void						initErrorMap ();
+		std::string					getServer() const;
+		std::string 				getRetryAfter() const;
+		std::string					getLastModified() const;
+		std::string					getLocation() const;
+		std::map<int, std::string>	getErrorMap() const;
+		std::map<int, std::string>	getErrorHtml() const;
 
-		std::string					getHeader ();
-		std::string					writeHeader ();
+		std::string					getStatusMessage(int code);
 
-		std::string					getStatusMessage (int code);
+		std::string					getHeader();
+		std::string					writeHeader();
 
-		void						initRequest ();
-		void						resetRequest ();
+		void						setErrorHtml(std::map<int, std::string> html);
+		void						changeHtmlRelativePath();
+		void						initErrorMap();
 
-		void						setHeader ();
-		void						setServer (const std::string& server = "");
-		void						setLastModified (const std::string& path);
-		void						setLocation (int code, const std::string& path);
+		void						initRequest();
+		void						resetRequest();
 
-		std::string					getServer () const;
-		std::string 				getRetryAfter () const;
-		std::string					getLastModified () const;
-		std::string					getLocation () const;
-		std::map<int, std::string>	getErrorMap () const;
-		std::map<int, std::string>	getErrorHtml () const;
+		void						setHeader();
+		void						setServer(const std::string& server = "");
+		void						setLastModified(const std::string& path);
+		void						setLocation(int code, const std::string& path);
 
-		void						printResponseHeader ();
+		void						printResponseHeader();
 	
 	protected:
 		std::string					_server;

@@ -1,6 +1,6 @@
 #include "./../includes/ServerBlock.hpp"
 
-ServerBlock::ServerBlock ()
+ServerBlock::ServerBlock()
 	: _block(""),
 	_addresses(),
 	_name(""),
@@ -10,7 +10,8 @@ ServerBlock::ServerBlock ()
 	_locations(),
 	_methods(),
 	_autoindex(ON),
-	_index()
+	_index(),
+	_hostPort()
 {}
 
 ServerBlock::ServerBlock (std::string block)
@@ -23,7 +24,8 @@ ServerBlock::ServerBlock (std::string block)
 	_locations(),
 	_methods(),
 	_autoindex(ON),
-	_index()
+	_index(),
+	_hostPort()
 {}
 
 ServerBlock::ServerBlock (const ServerBlock &srv)
@@ -40,7 +42,7 @@ ServerBlock::ServerBlock (const ServerBlock &srv)
 	_hostPort(srv._hostPort)
 {}
 
-ServerBlock::~ServerBlock () {}
+ServerBlock::~ServerBlock() {}
 
 ServerBlock					&ServerBlock::operator= (const ServerBlock &srv) {
 	_block = srv._block;
@@ -53,22 +55,23 @@ ServerBlock					&ServerBlock::operator= (const ServerBlock &srv) {
 	_methods = srv._methods;
 	_autoindex = srv._autoindex;
 	_index = srv._index;
+	_hostPort = srv._hostPort;
 
 	return (*this);
 }
 
-std::string					ServerBlock::getBlock () const { return (_block); }
-std::vector<std::string>	ServerBlock::getAddresses () const { return (_addresses); }
-std::string					ServerBlock::getName () const { return (_name); }
-std::map<int, std::string>	ServerBlock::getErrPages () const { return (_errPages); }
-int							ServerBlock::getClntSize () const { return (_clntSize); }
-std::string					ServerBlock::getRoot () const { return (_root); }
-std::vector<LocationBlock>	ServerBlock::getLocationBlocks () const { return (_locations); }
-std::vector<std::string>	ServerBlock::getMethods () const { return (_methods); }
-int							ServerBlock::getAutoindex () const { return (_autoindex); }
-std::vector<std::string>	ServerBlock::getIndex () const { return (_index); }
+std::string					ServerBlock::getBlock() const { return (_block); }
+std::vector<std::string>	ServerBlock::getAddresses() const { return (_addresses); }
+std::string					ServerBlock::getName() const { return (_name); }
+std::map<int, std::string>	ServerBlock::getErrPages() const { return (_errPages); }
+int							ServerBlock::getClntSize() const { return (_clntSize); }
+std::string					ServerBlock::getRoot() const { return (_root); }
+std::vector<LocationBlock>	ServerBlock::getLocationBlocks() const { return (_locations); }
+std::vector<std::string>	ServerBlock::getMethods() const { return (_methods); }
+int							ServerBlock::getAutoindex() const { return (_autoindex); }
+std::vector<std::string>	ServerBlock::getIndex() const { return (_index); }
 
-std::string					ServerBlock::getHostPort () const { return (_hostPort); }
+std::string					ServerBlock::getHostPort() const { return (_hostPort); }
 
 void						ServerBlock::setBlock (std::string block) { _block = block; }
 void						ServerBlock::setAddresses (std::vector<std::string> addr) { _addresses = addr; }
@@ -83,18 +86,21 @@ void						ServerBlock::setIndex (std::vector<std::string> index) { _index = inde
 
 void						ServerBlock::setHostPort(std::string hostPort) { _hostPort = hostPort; }
 
-int							ServerBlock::parseAddresses () {
+int							ServerBlock::parseAddresses()
+{
 	std::vector<std::string>	addresses;
 	std::pair<bool, size_t>		res = skipKey(_block, "listen", ";");
 	size_t						lPos = 0, scPos = 0;
 
-	if (res.first == false) {
+	if (res.first == false)
+	{
 		addresses.push_back("*:80");
 		setAddresses(addresses);
 		return (0);
 	}
 
-	while ((lPos = _block.find("listen", lPos)) != std::string::npos) {
+	while ((lPos = _block.find("listen", lPos)) != std::string::npos)
+	{
 		scPos = _block.find(";", lPos);
 		addresses.push_back(_block.substr(lPos + 7, scPos - lPos - 7));
 		lPos += 1;
@@ -105,7 +111,8 @@ int							ServerBlock::parseAddresses () {
 	return (0);
 }
 
-int							ServerBlock::parseName () {
+int							ServerBlock::parseName()
+{
 	std::string				names;
 	std::pair<bool, size_t>	res = skipKey(_block, "server_name", ";");
 
@@ -119,7 +126,8 @@ int							ServerBlock::parseName () {
 	return (0);
 }
 
-int							ServerBlock::parseErrPages () {
+int							ServerBlock::parseErrPages()
+{
 	std::string				errPages;
 	std::pair<bool, size_t>	res = skipKey(_block, "error_page", ";");
 	std::vector<std::string>	err_vec;
@@ -130,29 +138,25 @@ int							ServerBlock::parseErrPages () {
 	errPages = parseValue(_block, res.second, ";");
 
 	err_vec = split(errPages, ' ');
-	for (std::vector<std::string>::iterator it = err_vec.begin();
-		it != err_vec.end(); it++)
+	for (std::vector<std::string>::iterator it = err_vec.begin(); it != err_vec.end(); it++)
 	{
-
 		if (isNumber(*it) == 0)
 		{
 			errPages = *it;
 			break ;
 		}
 		else
-		{
 			_errPages[strToInt(*it)] = "";
-		}
 	}
 
-	for (std::map<int, std::string>::iterator it = _errPages.begin();
-		it != _errPages.end(); it++)
+	for (std::map<int, std::string>::iterator it = _errPages.begin(); it != _errPages.end(); it++)
 		it->second = errPages;
 
 	return (0);
 }
 
-int							ServerBlock::parseClntSize () {
+int							ServerBlock::parseClntSize()
+{
 	std::pair<bool, size_t>	res = skipKey(_block, "client_max_body_size", ";");
 	int						clntSize;
 
@@ -169,7 +173,8 @@ int							ServerBlock::parseClntSize () {
 	return (0);
 }
 
-int							ServerBlock::parseRoot () {
+int							ServerBlock::parseRoot()
+{
 	std::pair<bool, size_t>	res = skipKey(_block, "root", ";");
 
 	if (res.first == false)
@@ -180,7 +185,8 @@ int							ServerBlock::parseRoot () {
 	return (0);
 }
 
-int							ServerBlock::parseMethods () {
+int							ServerBlock::parseMethods()
+{
 	std::string				methods;
 	std::pair<bool, size_t>	res = skipKey(_block, "allow_methods", ";");
 
@@ -193,7 +199,8 @@ int							ServerBlock::parseMethods () {
 	if (_methods.empty())
 		return (0);
 
-	for (size_t i = 0; i < _methods.size(); i++) {
+	for (size_t i = 0; i < _methods.size(); i++)
+	{
 		if (_methods[i] != "GET" && _methods[i] != "POST" && _methods[i] != "DELETE" && _methods[i] != "PUT" && _methods[i] != "HEAD")
 			return (printErr("wrong method (GET, POST, DELETE, PUT, HEAD)"));
 	}
@@ -201,7 +208,8 @@ int							ServerBlock::parseMethods () {
 	return (0);
 }
 
-int							ServerBlock::parseAutoindex () {
+int							ServerBlock::parseAutoindex()
+{
 	std::string				is;
 	std::pair<bool, size_t>	res = skipKey(_block, "autoindex", ";");
 
@@ -218,11 +226,13 @@ int							ServerBlock::parseAutoindex () {
 	return (0);
 }
 
-int							ServerBlock::parseIndex () {
+int							ServerBlock::parseIndex()
+{
 	std::string				index;
 	std::pair<bool, size_t>	res = skipKey(_block, "\tindex", ";");
 
-	if (res.first == false) {
+	if (res.first == false)
+	{
 		std::vector<std::string>	idx;
 		idx.push_back("youpi.bad_extension");
 		setIndex(idx);
@@ -235,7 +245,8 @@ int							ServerBlock::parseIndex () {
 	return (0);
 }
 
-int							ServerBlock::parse () {
+int							ServerBlock::parse()
+{
 	std::vector<std::string>	locBlocks = splitBlocks(_block, "location ");
 
 	parseAddresses();
@@ -247,7 +258,8 @@ int							ServerBlock::parse () {
 	parseAutoindex();
 	parseIndex();
 
-	for (size_t i = 0; i < locBlocks.size(); i++) {
+	for (size_t i = 0; i < locBlocks.size(); i++)
+	{
 		addLocationBlock(LocationBlock(locBlocks[i]));
 		_locations[i].parse();
 		if (_locations[i].getRoot() == ".")

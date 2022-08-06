@@ -1,12 +1,31 @@
 # include "./../includes/GeneralHeader.hpp"
 
-GeneralHeader::GeneralHeader () {}
-GeneralHeader::GeneralHeader (const GeneralHeader& gh) { (void)gh; }
-GeneralHeader::~GeneralHeader () {}
+GeneralHeader::GeneralHeader()
+	: _date(""),
+	_connection(""),
+	_transferEncoding("")
+{}
 
-GeneralHeader&	GeneralHeader::operator= (const GeneralHeader& gh) { (void)gh; return (*this); }
+GeneralHeader::GeneralHeader(const GeneralHeader& gh)
+	: _date(gh._date),
+	_connection(gh._connection),
+	_transferEncoding(gh._transferEncoding)
+{}
+GeneralHeader::~GeneralHeader() {}
 
-void			GeneralHeader::setDate (const std::string& date)
+GeneralHeader&	GeneralHeader::operator=(const GeneralHeader& gh)
+{
+	_date = gh._date;
+	_connection = gh._connection;
+	_transferEncoding = gh._transferEncoding;
+	return (*this);
+}
+
+std::string		GeneralHeader::getDate() const { return (_date); }
+std::string		GeneralHeader::getConnection() const { return (_connection); }
+std::string		GeneralHeader::getTransferEncoding() const { return (_transferEncoding); }
+
+void			GeneralHeader::setDate(const std::string& date)
 {
 	if (date.length() != 0)
 	{
@@ -25,7 +44,7 @@ void			GeneralHeader::setDate (const std::string& date)
 	_date = strDate;
 }
 
-void	 		GeneralHeader::setConnection (const std::string& connection)
+void	 		GeneralHeader::setConnection(const std::string& connection)
 {
 	if (connection.length() != 0)
 	{
@@ -35,17 +54,13 @@ void	 		GeneralHeader::setConnection (const std::string& connection)
 	_connection = "keep-alive";
 }
 
-void			GeneralHeader::setTransferEncoding (const std::string& transferEncoding)
+void			GeneralHeader::setTransferEncoding(const std::string& transferEncoding)
 {
 	if (transferEncoding == "")
 		_transferEncoding = "identity";
 }
 
-std::string		GeneralHeader::getDate () const { return (_date); }
-std::string		GeneralHeader::getConnection () const { return (_connection); }
-std::string		GeneralHeader::getTransferEncoding () const { return (_transferEncoding); }
-
-void			GeneralHeader::printGeneralHeader () const
+void			GeneralHeader::printGeneralHeader() const
 {
 	std::cout << "date: " << getDate() << std::endl;
 	std::cout << "connection: " << getConnection() << std::endl;
