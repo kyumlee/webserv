@@ -5,7 +5,6 @@ GeneralHeader::GeneralHeader (const GeneralHeader& gh) { (void)gh; }
 GeneralHeader::~GeneralHeader () {}
 
 GeneralHeader&	GeneralHeader::operator= (const GeneralHeader& gh) { (void)gh; return (*this); }
-// virtual void abstract() = 0;
 
 void			GeneralHeader::setDate (const std::string& date)
 {
@@ -26,7 +25,6 @@ void			GeneralHeader::setDate (const std::string& date)
 	_date = strDate;
 }
 
-//connection이 없다면 default로 keep-alive
 void	 		GeneralHeader::setConnection (const std::string& connection)
 {
 	if (connection.length() != 0)
@@ -37,7 +35,6 @@ void	 		GeneralHeader::setConnection (const std::string& connection)
 	_connection = "keep-alive";
 }
 
-//transferEncoding가 없다면 압축이나 수정이 없는 버전으로 초기화
 void			GeneralHeader::setTransferEncoding (const std::string& transferEncoding)
 {
 	if (transferEncoding == "")

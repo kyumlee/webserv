@@ -9,20 +9,5 @@ int	main(int argc, char** argv)
 
 	Config	conf;
 	conf.initServer(confFile);
-	// std::cout << "parse done" << std::endl;
-	// std::vector<ServerBlock>	srvs = conf.getServerBlocks();
-	// srvs[0].print_server_block();
-	// LocationBlock	loc = srvs[0].selectLocationBlock("/hello");
-	// std::vector<LocationBlock> locs = srvs[0].getLocationBlocks();
-	// LocationBlock	loc = locs[0];
-	// loc.print_location_block();
-
-	
-
-
-	// if (server.init_listen(argv[1]) == 1)
-	// 	return (0);
-	// if (server.server_start() == 1)
-	// 	return (0);
 	return (0);
 }

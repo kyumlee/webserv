@@ -20,14 +20,14 @@ class	ServerBlock {
 		std::string					_hostPort;
 
 	public:
-		// constructor, destructor, assignment operator overload
+	
 		ServerBlock ();
 		ServerBlock (std::string block);
 		ServerBlock (const ServerBlock &srv);
 		~ServerBlock ();
 		ServerBlock					&operator= (const ServerBlock &srv);
 
-		// getter
+	
 		std::string					getBlock () const;
 		std::vector<std::string>	getAddresses () const;
 		std::string					getName () const;
@@ -41,7 +41,7 @@ class	ServerBlock {
 
 		std::string					getHostPort () const;
 		
-		// setter
+	
 		void						setBlock (std::string block);
 		void						setAddresses (std::vector<std::string> addr);
 		void						setName (std::string name);
@@ -55,7 +55,7 @@ class	ServerBlock {
 
 		void						setHostPort(std::string hostPort);
 
-		// parse
+	
 		int							parseAddresses ();
 		int							parseName ();
 		int							parseErrPages ();

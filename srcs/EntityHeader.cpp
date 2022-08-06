@@ -21,15 +21,9 @@ void					EntityHeader::setContentLength (const std::string& path, const std::str
 
 		if (!stat(path.c_str(), &fileStat))
 			_contentLength = intToStr(fileStat.st_size);
-		else
-		{
-			printErr("failed to get size");
-			setCode(Internal_Server_Error);
-		}
 	}
 }
 
-//html, css, js, jpeg, png, bmp, plain만 정해놨는데 다른 것도 해야되는지 알아봐야 한다.
 void					EntityHeader::setContentTypeLocation (const std::string& path, std::string type, std::string contentLocation)
 {
 	if (type != "")
@@ -63,11 +57,6 @@ void					EntityHeader::setContentTypeLocation (const std::string& path, std::str
 		contentType = "image/svg+xml";
 	else if (fileType == "webp")
 		contentType = "image/webp";
-	//bmp는 사용을 안 하는 것이 좋다고 한다.
-	// else if (fileType == "bmp")
-	// 	fileType = "image/bmp";
-	//비디오, 음악 파일은 일단 제외했다.
-	//fileType이 이상할 떄
 	else
 	{
 		fileType = "";
@@ -93,7 +82,6 @@ void					EntityHeader::setContentLanguage (const std::string& contentLanguage)
 void					EntityHeader::setContentEncoding (const std::string& contentEncoding)
 { _contentEncoding = contentEncoding; }
 
-//둘 다 쓰는지 확인해보자
 void					EntityHeader::setAllow (const std::string& allow)
 { _allow = allow; }
 void					EntityHeader::setAllow (const std::set<std::string>& methods)

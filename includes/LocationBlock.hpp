@@ -22,14 +22,14 @@ class	LocationBlock {
 		std::string					_path;
 
 	public:
-		// constructor, destructor, assignment operator overload
+	
 		LocationBlock ();
 		LocationBlock (std::string block);
 		LocationBlock (const LocationBlock &lb);
 		~LocationBlock ();
 		LocationBlock	&operator= (const LocationBlock &lb);
 
-		// getter
+	
 		std::string					getBlock () const;
 		int							getMod () const;
 		std::string					getURI () const;
@@ -45,7 +45,7 @@ class	LocationBlock {
 
 		bool						empty() const;
 
-		// setter
+	
 		void						setMod (int mod);
 		void						setURI (std::string uri);
 		void						setClntSize (int clntSize);
@@ -59,7 +59,7 @@ class	LocationBlock {
 		void						setEmpty(bool empty);
 		void						setPath(const std::string& path);
 
-		// parse
+	
 		int							parseModMatch ();
 		int							parseClntSize ();
 		int							parseMethods ();

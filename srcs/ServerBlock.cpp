@@ -252,7 +252,6 @@ int							ServerBlock::parse () {
 		_locations[i].parse();
 		if (_locations[i].getRoot() == ".")
 			_locations[i].setRoot(getRoot());
-		// _locations[i].setURI(_root + _locations[i].getURI());
 	}
 
 	return (0);

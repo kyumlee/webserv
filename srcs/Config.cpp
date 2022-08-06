@@ -40,7 +40,9 @@ int	Config::startServer ()
 		if ((*it).initServerSocket() == 1)
 		{
 			printErr("failed to init server");
+			std::cout << "fail server port: " << (*it).getListen().port << std::endl;
 			_serverVec.erase(it);
+			std::cout << "server vec size: " << _serverVec.size() << std::endl;
 			continue ;
 		}
 	}
@@ -55,9 +57,6 @@ int	Config::startServer ()
 
 		newEventsVec.push_back(newEvents);
 		currEventVec.push_back(&currEvent);
-
-//		(*it).initServerMember();
-
 		std::cout << YELLOW << "host : " << (*it).getListen().host << ", port : " << (*it).getListen().port;
 		std::cout << " server start!!!!!!" << std::endl << RESET;
 	}
@@ -67,6 +66,11 @@ int	Config::startServer ()
 
 	while (1)
 	{
+		if (_serverVec.empty() == true)
+		{
+			printErr("no executable server");
+			break ;
+		}
 		std::vector<Server>::iterator	it = _serverVec.begin();
 
 		struct timespec timeVal;
@@ -81,20 +85,23 @@ int	Config::startServer ()
 				_serverVec[i].getEventList(),
 				LISTEN_BUFFER_SIZE,
 				&timeVal);
-/*			newEventsVec[i] = kevent(_serverVec[i].getKq(),
-				&_serverVec[i].getChangeList()[0],
-				_serverVec[i].getChangeList().size(),
-				_serverVec[i].getEventList(),
-				LISTEN_BUFFER_SIZE,
-				&timeVal);*/
 
 			if (newEventsVec[i] == -1)
 			{
-				printErr("kevent()");
+				std::cout << "i port: " << _serverVec[i].getListen().port << ", iterator port : " << (*it).getListen().port << std::endl;
+				printErr(intToStr(_serverVec[i].getListen().port) + " port kevent error");
 				_serverVec.erase(it);
-				continue ;
+				for (std::vector<int>::iterator newee = newEventsVec.begin(); newee != newEventsVec.end(); newee++)
+					std::cout << "newevents: " << (*newee) << std::endl;
+				newEventsVec.erase(newEventsVec.begin() + i);
+				for (std::vector<int>::iterator newee = newEventsVec.begin(); newee != newEventsVec.end(); newee++)
+					std::cout << "after newevents: " << (*newee) << std::endl;
+				currEventVec.erase(currEventVec.begin() + i);
+				// std::cout << (*_serverVec.erase(_serverVec.begin() + i)).getListen().port << std::endl;
+
+				std::cout << "after i port: " << _serverVec[i].getListen().port << ", iterator port : " << (*it).getListen().port << std::endl;
+				break ;
 			}
-//			_serverVec[i]._changeList.clear();
 			_serverVec[i].resetChangeList();
 
 			for (int occurEvent = 0; occurEvent < newEventsVec[i]; occurEvent++)
@@ -104,8 +111,11 @@ int	Config::startServer ()
 				{
 					if (_serverVec[i].eventError(currEventVec[i]->ident) == 1)
 					{
-						printErr("stopping server due to event error");
-						_serverVec.erase(it);
+						printErr(intToStr(_serverVec[i].getListen().port) + "stopping server due to event error");
+						// _serverVec.erase(it);
+						_serverVec.erase(_serverVec.begin() + i);
+						newEventsVec.erase(newEventsVec.begin() + i);
+						currEventVec.erase(currEventVec.begin() + i);
 						break ;
 					}
 				}
@@ -145,13 +155,8 @@ int							Config::initServer(const std::string& conf)
 			_serverVec[v].setServerName(_serverBlock[i].getName());
 			_serverVec[v].setServerAllowedMethods(_serverBlock[i].getMethods());
 			_serverVec[v].setResponseRoot(_serverBlock[i].getRoot());
-
-			_serverVec[v].setAutoindex(_serverBlock[i].getAutoindex());
-			_serverVec[v].setIndex(_serverBlock[i].getIndex());
-
-			if (_serverBlock[i].getErrPages().empty() == true)
-				_serverVec[v].initServerErrorPages();
-			else
+			_serverVec[v].initServerErrorPages();
+			if (_serverBlock[i].getErrPages().empty() == false)
 				_serverVec[v].setServerErrorPages(_serverBlock[i].getErrPages());
 
 			_serverVec[v].setServerRoot(_serverBlock[i].getRoot());

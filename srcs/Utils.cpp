@@ -188,24 +188,15 @@ int							compareURIs (std::string URI, std::string request, int mod)
 	return (1);
 }
 
-//파일이 REG(regular file)이면 1을 리턴하고 다른 경우에는 0을 리턴한다.
 int							pathIsFile(const std::string& path)
 {
 	struct stat	s;
 	if (stat(path.c_str(), &s) == 0)
 	{
 		if (s.st_mode & S_IFREG)
-		{
-			std::cout << "file is regular file" << std::endl;
 			return (1);
-		}
 		if (s.st_mode & S_IFDIR)
-		{
-			std::cout << "file is directory" << std::endl;
 			return (2);
-		}
-		std::cout << "file type is " << (s.st_mode & S_IFMT) << std::endl;
-		std::cout << "file is not regular file" << std::endl;
 	}
 	
 	return (0);
@@ -254,7 +245,6 @@ std::string					setHtml(const std::string& path, const std::string& lang,
 int							setErrorPages(const std::string& errPages, std::map<int, std::string>* errMap)
 {
 	std::vector<std::string>	err = split(errPages, ' ');
-	//errPages를 공백으로 나눈 것을 저장
 	std::string	html = *(--err.end());
 	err.erase(err.end() - 1);
 	if (html.find(".html") == std::string::npos)
@@ -302,7 +292,6 @@ void						printErrmap(std::map<int, std::string> errmap)
 	std::cout << std::endl;
 }
 
-//s1의 끝부분에 s2가 있다면 0을 리턴, s2가 없다면 1을 리턴
 int							compareEnd(const std::string& s1, const std::string& s2)
 {
 	size_t	s1End = s1.size();
@@ -317,7 +306,7 @@ int							compareEnd(const std::string& s1, const std::string& s2)
 }
 
 std::string					findExtension(std::string& file)
-{//file의 확장자를 찾는다.
+{
 	size_t	extensionStart = file.find_last_of('.');
 	if (extensionStart == std::string::npos)
 		return ("");
@@ -325,7 +314,6 @@ std::string					findExtension(std::string& file)
 	return (extension);
 }
 
-//슬래쉬의 맨 뒤쪽으로 가서 파일 이름을 찾고, 슬래쉬가 없다면 그대로 path를 반환
 std::string					findFileName(const std::string& path)
 {
 	size_t	fileNameStart = path.find_last_of('/');
@@ -443,7 +431,6 @@ bool					hostToInt (std::string host, t_listen* listen)
 	if (host == "localhost")
 		host = "127.0.0.1";
 
-	//host가 그냥 숫자로 되어있을 떄
 	if (isNumber(host) == 1)
 	{
 		ret = std::atoi(host.c_str());
@@ -476,7 +463,7 @@ bool					hostToInt (std::string host, t_listen* listen)
 }
 
 int						setListen (std::string strHost, t_listen* listen)
-{//에러가 발생하면 1을 리턴, 정상작동하면 0을 리턴
+{
 	if (strHost == "")
 		return (printErr("host header doesn't exist"));
 
@@ -486,11 +473,9 @@ int						setListen (std::string strHost, t_listen* listen)
 
 	hostPort = split(strHost, ':');
 
-	//포트는 생략할 수 있다. HTTP URL에서는 port default가 80이다.
 	if (*hostPort.begin() == strHost)
 	{
 		listen->port = htons(DEFAULT_PORT);
-		//strHost가 이상한 값을 가지고 있을 때
 		if ((host = hostToInt(strHost, listen)) == 1)
 			return (printErr("invalid host"));
 
@@ -533,7 +518,6 @@ size_t						calExponent(const std::string& str)
 	return (num);
 }
 
-//string을 받아서 16진수로 이루어져 있으면 1을 리턴, 아니면 0을 리턴
 int							checkHex(std::string& hex)
 {
 	for (std::string::iterator it = hex.begin(); it != hex.end(); it++)
@@ -546,10 +530,8 @@ int							checkHex(std::string& hex)
 	return (1);
 }
 
-//string형으로 받은 hex가 16진수로 이루어져 있지 않으면 0을 리턴
 size_t						hexToDecimal(std::string& hex)
 {
-	// std::string	hex_str = "0123456789abcdef";
 	size_t	ret = 0;
 	std::string::iterator	hexIt = hex.begin();
 	if (checkHex(hex) == 0)

@@ -1,7 +1,6 @@
 #ifndef __CGI_HPP__
 # define __CGI_HPP__
 
-// # include "./Response.hpp"
 # include "./ResponseHeader.hpp"
 
 class Cgi

@@ -20,13 +20,13 @@ void		Response::initResponseValue () { _remainSend = false; }
 
 int			Response::checkAllowedMethods ()
 {
-	//method를 알고는 있지만, allow가 되지 않았을 때
+
 	if (_possibleMethods.find(_method) != _possibleMethods.end() && _allowedMethods.find(_method) == _allowedMethods.end())
 	{
 		_code = Method_Not_Allowed;
 		return (1);
 	}
-	//method가 뭔지 모를 때
+
 	if (_possibleMethods.find(_method) == _possibleMethods.end())
 	{
 		_code = Method_Not_Allowed;
@@ -50,8 +50,6 @@ std::string	Response::responseErr ()
 	return (header);
 }
 
-//요청마다 header를 만들어야 하고 에러가 발생했을 때에 errormap을 적절히 불러와야 한다.
-//request의 method를 확인한다.
 int			Response::verifyMethod (int fd, int requestEnd, int autoindex, std::string index, Cgi& cgi)
 {
 	int			error = 0, ret = 0;
@@ -60,8 +58,6 @@ int			Response::verifyMethod (int fd, int requestEnd, int autoindex, std::string
 	{
 		error = 1;
 		_totalResponse = responseErr();
-		std::cout << PINK << "response path: " << _path << RESET << std::endl;
-		std::cout << BLUE << "total response size: " << _totalResponse.length() << RESET << std::endl;
 		ret = 2;
 	}
 	else
@@ -76,20 +72,18 @@ int			Response::verifyMethod (int fd, int requestEnd, int autoindex, std::string
 			}
 			else if (getRemainSend() == false)
 			{
-//				if (getPath() == "/" && _method == "GET")
-//					setPath(getRoot() + "/index.html");
 				if (checkAllowedMethods() == 1)
 					_totalResponse = getHeader();
 				else if (_method == "GET")
-					_totalResponse = execGET(_path, fd, autoindex, index);
+					_totalResponse = execGET(_path, autoindex, index);
 				else if (_method == "HEAD")
-					_totalResponse = execHEAD(_path, fd, autoindex, index);
+					_totalResponse = execHEAD(_path, autoindex, index);
 				else if (_method == "POST")
-					_totalResponse = execPOST(_path, fd, _body, cgi);
+					_totalResponse = execPOST(_path, _body, cgi);
 				else if (_method == "PUT")
-					_totalResponse = execPUT(_path, fd, _body);
+					_totalResponse = execPUT(_path, _body);
 				else if (_method == "DELETE")
-					_totalResponse = execDELETE(_path, fd);
+					_totalResponse = execDELETE(_path);
 
 				std::map<int, std::string>::iterator	it = _errorHtml.find(_code);
 				if (it != _errorHtml.end())
@@ -102,75 +96,63 @@ int			Response::verifyMethod (int fd, int requestEnd, int autoindex, std::string
 
 	std::string	sendMsg;
 	int			writeSize;
+	size_t		sendMsgSize;
 
 	if (_totalResponse.length() - _sendStartPos >= CGI_BUFFER_SIZE)
 	{
 		sendMsg = _totalResponse.substr(_sendStartPos, CGI_BUFFER_SIZE);
-		writeSize = ::send(fd, sendMsg.c_str(), CGI_BUFFER_SIZE, 0);
-		if (error || writeSize == -1)
-		{
-			if (!error)
-				printErr("::send()");
-			_totalResponse.clear();
-			return (1);
-		}
-		_sendStartPos += writeSize;
-		_totalSendSize += writeSize;
+		sendMsgSize = CGI_BUFFER_SIZE;
 		_remainSend = true;
 	}
 	else if (_remainSend == true)
 	{
 		sendMsg = _totalResponse.substr(_sendStartPos, _totalResponse.length() - _sendStartPos);
-		std::cout << YELLOW << "#######request[" << fd << "] !!!!!" << std::endl;
-		std::cout << _totalResponse.substr(0, 100) << " ... " << _totalResponse.substr(_totalResponse.length() - 20, 20) << std::endl;
-		std::cout << "total response size: " << _totalResponse.size() << ", sendMsg size: " << sendMsg.size() << RESET << std::endl;
-
-		writeSize = ::send(fd, sendMsg.c_str(), sendMsg.length(), 0);
-		if (writeSize == -1)
-		{
-			_totalResponse.clear();
-			return (printErr("::send()"));
-		}
-		if (writeSize != (int)sendMsg.length())
-		{
-			std::cout << "send msg length: " << sendMsg.length() << ", write size: " << writeSize << std::endl;
-			_sendStartPos += writeSize;
-			_totalSendSize += writeSize;
-			_remainSend = true;
-			return (0);
-		}
-		std::cout << RED << "#######response[" << fd << "] send!!!!!" << std::endl << RESET;
-		_totalSendSize += writeSize;
-		std::cout << PINK << "send start pos: " << _sendStartPos << ", total send size: " << _totalSendSize << RESET << std::endl;
-		_sendStartPos = 0;
-		_totalSendSize = 0;
+		sendMsgSize = _totalResponse.length() - _sendStartPos;
 		_remainSend = false;
-		_totalResponse.clear();
 	}
 	else
 	{
-		writeSize = ::send(fd, _totalResponse.c_str(), _totalResponse.size(), 0);
-		if (error || writeSize == -1)
-		{
-			if (!error)
-				printErr("::send()");
-			_totalResponse.clear();
-			return (1);
-		}
+		sendMsg = _totalResponse;
+		sendMsgSize = _totalResponse.length();
+	}
+	writeSize = ::send(fd, sendMsg.c_str(), sendMsgSize, 0);
+	if (error || writeSize == -1)
+	{
+		if (!error)
+			printErr("::send()");
+		_totalResponse.clear();
+		return (1);
+	}
+	_sendStartPos += writeSize;
+	_totalSendSize += writeSize;
+	if (writeSize != static_cast<int>(sendMsgSize))
+	{
+		_remainSend = true;
+		return (0);
+	}
+
+	if (_remainSend == false)
+	{
+		_sendStartPos = 0;
+		_totalSendSize = 0;
+		std::cout << RED << "#######response[" << fd << "] send!!!!!" << std::endl << RESET;
+		if (_totalResponse.length() > 300)
+			std::cout << YELLOW << _totalResponse.substr(0, 250) << " ... " << _totalResponse.substr(_totalResponse.length() - 20, 20) << RESET << std::endl;
+		else
+			std::cout << YELLOW << _totalResponse << RESET << std::endl;
 		_totalResponse.clear();
 	}
 	
 	return (ret);
 }
 
-std::string	Response::execGET (std::string& path, int fd, int autoindex, std::string index)
+std::string	Response::execGET (std::string& path, int autoindex, std::string index)
 {
 	std::string			fileContent = "";
 	std::ifstream		file;
 	std::stringstream	buffer;
 	std::string			html = setHtml(path, "en", "utf-8", "directory listing", sizetToStr(_listen.host), _listen.port);
 
-	(void)fd;
 	if (autoindex == 0 && html != "")
 	{
 		setCode(OK);
@@ -208,20 +190,19 @@ std::string	Response::execGET (std::string& path, int fd, int autoindex, std::st
 	return (fileContent);
 }
 
-std::string	Response::execHEAD (std::string& path, int fd, int autoindex, std::string index)
+std::string	Response::execHEAD (std::string& path, int autoindex, std::string index)
 {
-	std::string			fileContent = execGET(path, fd, autoindex, index);
+	std::string			fileContent = execGET(path, autoindex, index);
 	fileContent = fileContent.substr(0, getHeader().length());
 	return (fileContent);
 }
 
-std::string	Response::execPOST (const std::string& path, int fd, const std::string& body, Cgi& cgi)
+std::string	Response::execPOST (const std::string& path, const std::string& body, Cgi& cgi)
 {
 
 	std::ofstream	file;
 	std::string		fileContent;
 
-	(void)fd;
 	if (cgi.getCgiExist() == true && getRemainSend() == false)
 	{
 		fileContent = cgi.executeCgi(cgi.getName());
@@ -250,7 +231,6 @@ std::string	Response::execPOST (const std::string& path, int fd, const std::stri
 	{
 		if (pathIsFile(path))
 		{
-			std::cout << "file already exists" << std::endl;
 			file.open(path.c_str(), std::ofstream::out | std::ofstream::app);
 			if (file.is_open() == false)
 			{
@@ -279,18 +259,13 @@ std::string	Response::execPOST (const std::string& path, int fd, const std::stri
 	return (fileContent);
 }
 
-std::string	Response::execPUT (const std::string& path, int fd, std::string& body)
+std::string	Response::execPUT (const std::string& path, std::string& body)
 {
-	//ofstream형은 open mode를 따로 작성하지 않으면
-	//기존에 파일이 존재했다면 삭제하는 trunc, 출력 전용을 뜻하는 out모드로 open된다.
-	(void)fd;
 	std::ofstream	file;
 	std::string		fileContent;
 
-	//file이 이미 존재하고 regular file일 때 파일을 갱신한다.
 	if (pathIsFile(path))
 	{
-		std::cout << "file already exists" << std::endl;
 		file.open(path.c_str());
 		if (file.is_open() == false)
 		{
@@ -302,7 +277,6 @@ std::string	Response::execPUT (const std::string& path, int fd, std::string& bod
 		file << body;
 		file.close();
 	}
-	//file이 존재하지 않거나, file이 regular file이 아닐 때 작동
 	else
 	{
 		file.open(path.c_str());
@@ -320,9 +294,8 @@ std::string	Response::execPUT (const std::string& path, int fd, std::string& bod
 	return (fileContent);
 }
 
-std::string	Response::execDELETE (std::string& path, int fd)
-{//일단 delete가 제대로 되지 않을 때는 생각하지 않고 무조건 0을 리턴하는 것으로 했다.
-	(void)fd;
+std::string	Response::execDELETE (std::string& path)
+{
 	std::string	fileContent;
 
 	if (pathIsFile(path))
@@ -345,8 +318,7 @@ std::string	Response::execDELETE (std::string& path, int fd)
 }
 
 std::string	Response::readHtml (const std::string& path)
-{//path가 REGULAR file이면 open하여 파일 내용을 리턴한다.
-//path가 REGULAR file이 아니면 errorHtml을 보낸다.
+{
 	std::ofstream			file;
 	std::stringstream		buf;
 

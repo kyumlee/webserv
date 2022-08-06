@@ -1,19 +1,18 @@
 #ifndef __SERVER_HPP__
 # define __SERVER_HPP__
 
-//# include "./Cgi.hpp"
 # include "./Response.hpp"
 
 class Server
 {
 	private:
-		struct sockaddr_in			_serverAddr; //server의 주소를 저장
-		int							_serverSocket; //serverSocket의 fd를 저장
-		t_listen					_listen; //listen할 host와 port를 저장
-		int							_kq; //kqueue를 통해 받은 fd를 저장
-		std::map<int, std::string>	_request; //request의 socket과 socket의 내용을 저장
-		std::vector<struct kevent>	_changeList; //kevent를 모두 저장
-		struct kevent				_eventList[LISTEN_BUFFER_SIZE]; //이벤트가 발생한 kevent를 저장
+		struct sockaddr_in			_serverAddr;
+		int							_serverSocket;
+		t_listen					_listen;
+		int							_kq;
+		std::map<int, std::string>	_request;
+		std::vector<struct kevent>	_changeList;
+		struct kevent				_eventList[LISTEN_BUFFER_SIZE];
 
 		std::map<int, Response>		_response;
 		std::map<int, int>			_bodyCondition;
@@ -32,7 +31,6 @@ class Server
 		std::string					_responseRoot;
 		std::map<int, std::string>	_serverErrorPages;
 
-		//configuation file 관련
 		size_t						_clientMaxBodySize;
 		int							_autoindex;
 		std::vector<std::string>	_index;
@@ -47,9 +45,6 @@ class Server
 		~Server ();
 
 		Server&						operator= (const Server& server);
-
-		//인자로 받은 값들을 EV_SET을 이용해 kevent구조체 변수인 temp event를 초기화시키고,
-		//changeList에 temp event를 추가한다.
 		void						changeEvents (std::vector<struct kevent>& changeList, uintptr_t ident, int16_t filter, uint16_t flags, uint32_t fflags, intptr_t data, void* udata);
 
 		void						disconnectRequest (int fd);
@@ -81,13 +76,13 @@ class Server
 		std::string					getResponseRoot () const;
 		std::map<int, std::string>	getServerErrorPages () const;
 		t_listen					getListen () const;
-		struct sockaddr_in			getServerAddr () const; //server의 주소를 저장
-		int							getServerSocket () const; //serverSocket의 fd를 저장
-		int							getKq (); //kqueue를 통해 받은 fd를 저장
-		std::map<int, std::string>	getRequest (); //request의 socket과 socket의 내용을 저장
-		std::vector<struct kevent>	getChangeList (); //kevent를 모두 저장
+		struct sockaddr_in			getServerAddr () const;
+		int							getServerSocket () const;
+		int							getKq ();
+		std::map<int, std::string>	getRequest ();
+		std::vector<struct kevent>	getChangeList ();
 		void						resetChangeList ();
-		struct kevent&				getEventList (int index); //이벤트가 발생한 kevent를 저장
+		struct kevent&				getEventList (int index);
 		struct kevent*				getEventList ();
 		std::vector<LocationBlock>	getLocations ();
 		void						addLocation (LocationBlock& lb);
@@ -96,15 +91,13 @@ class Server
 
 		void						initCgiEnv (int fd);
 
-		LocationBlock				selectLocationBlock (std::string requestURI, int fd);
+		LocationBlock				selectLocationBlock (std::string requestURI);
 		void						locationToServer (LocationBlock block, int fd);
 
 		void						resetRequest (int fd);
 
 		void						eventRead (int fd);
 		void						eventWrite (int fd);
-
-		void						initServerMember ();
 };
 
 #endif

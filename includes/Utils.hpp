@@ -7,21 +7,21 @@
 # include <fstream>
 # include <sstream>
 # include <string>
-# include <sys/types.h> //st_mtime
-# include <sys/event.h> //kevent
-# include <sys/time.h> //timeval
+# include <sys/types.h>
+# include <sys/event.h>
+# include <sys/time.h>
 # include <sys/socket.h>
-# include <sys/stat.h> // struct stat
-# include <arpa/inet.h> //sockaddr_in
+# include <sys/stat.h>
+# include <arpa/inet.h>
 # include <unistd.h>
 # include <fcntl.h>
-# include <dirent.h> //DIR
+# include <dirent.h>
 # include <set>
 
-# include <limits> //numeric_limits
+# include <limits>
 
-# include <cstring> //memset
-# include <cctype> //isalpha
+# include <cstring>
+# include <cctype>
 # include <cmath>
 
 # define DEFAULT_CONF		"./conf/mac2.conf"
@@ -70,37 +70,16 @@
 
 enum	ErrorCode
 {
-	Continue =		100, //지금까지 상태가 괜찮다는 임시적인 응답
-	OK =			200, //요청이 성공적으로 됨
-	Created =		201, //요청이 성공하여 새로운 리소스 생성
-	No_Content =	204, //요청에 대해서 보내줄 콘텐츠가 없다
-
-	Bad_Request =			400, //요청이 잘못된 문법으로 이루어져 있을 때
-	Forbidden =				403, //서버가 클라이언트가 누군지 알고 있고, 클라이언트가 권리가 없을 때
-	Not_Found =				404, //요청받은 리소스를 찾지 못했을 때
-	Method_Not_Allowed =	405, //요청한 메소드를 서버에서 알고는 있지만 금지했을 때
-	//GET과 HEAD는 필수 메소드이기 때문에 제거하면 안된다.
-	Payload_Too_Large =		413, //요청 엔티티가 서버에서 정의한 한계보다 클 때
-	//서버는 연결을 끊거나 Retry-After헤더필드로 돌려 보냄
-	Internal_Server_Error =	500, //서버가 처리 방법을 모를 때
-
-	//사용할지 말지 모르는 것들
-	Moved_Permanently =					301, //요청한 리소스의 URI가 변경되었음을 의미
-	Found =								302, //요청한 리소스의 URI가 일시적으로 변경되었음을 의미
-	See_Other =							303, //요청한 리소스를 다른 URI에서 GET요청을 통해 얻어야 할 때
-	Unauthorized =						401, //서버가 클라이언트가 누군지 모르고, 클라이언트가 권리가 없을 때
-	Request_Timeout =					408, //요청을 한지 시간이 오래된 연결에 전송
-	Conflict =							409, //요청이 현재 서버의 상태와 충돌할 때
-	Length_Required =					411, //요청이 Content-Length헤더 필드가 정의되지 않을 때
-	Precondition_Failed =				412, //클라이언트의 헤더에 있는 전제조건이 서버의 전제조건에 적절하지 않을 때
-	URI_Too_Long =						414, //클라이언트가 요청한 URI가 서버에서 처리하지 않기로 한 길이보다 길 때
-	Unsupported_Media_Type =			415, //요청한 미디어 포맷을 서버에서 지원하지 않을 때
-	Requested_Range_Not_Satisfiable =	416, //Range 헤더 필드에 요청한 지정 범위를 만족시킬 수 없을 때
-	Too_Many_Requests =					429, //user가 주어진 시간 내에서 너무 많은 request를 보냈을 때
-	Request_Header_Fields_Too_Large =	431, //요청한 헤더 필드가 너무 클 때
-	Bad_Gateway =						502, //서버가 요청을 처리하는 데 필요한 응답을 얻기 위해 게이트웨이로 작업하는 동안 잘못된 응답을 수신했을 때
-	Service_Unavailable =				503, //서버가 요청을 처리할 준비가 되지 않았을 때
-	HTTP_Version_Not_Supported =		505 //요청에 사용된 HTTP 버전을 서버에서 지원하지 않을 때
+	Continue =		100,
+	OK =			200,
+	Created =		201,
+	No_Content =	204,
+	Bad_Request =			400,
+	Forbidden =				403,
+	Not_Found =				404,
+	Method_Not_Allowed =	405,
+	Payload_Too_Large =		413,
+	Internal_Server_Error =	500,
 };
 
 enum	BodyExist

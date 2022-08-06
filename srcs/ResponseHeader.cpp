@@ -10,27 +10,12 @@ ResponseHeader&				ResponseHeader::operator= (const ResponseHeader& rh)
 	return (*this);
 }
 
-void						ResponseHeader::initErrorHtml ()
-{
-	setErrorHtml(Bad_Request, "400.html");
-	setErrorHtml(Forbidden, "403.html");
-	setErrorHtml(Not_Found, "404.html");
-	setErrorHtml(Method_Not_Allowed, "405.html");
-	setErrorHtml(Payload_Too_Large, "413.html");
-	setErrorHtml(Internal_Server_Error, "500.html");
-	changeHtmlRelativePath();
-}
-
-void						ResponseHeader::setErrorHtml (int code, std::string html)
-{ _errorHtml[code] = html; }
-
 void						ResponseHeader::setErrorHtml (std::map<int, std::string> html)
 {
 	_errorHtml = html;
 	changeHtmlRelativePath();
 }
 
-//errorHtml에 저장되어있는 파일이름을 상대경로로 바꿔준다.
 void						ResponseHeader::changeHtmlRelativePath ()
 {
 	for (std::map<int, std::string>::iterator it = _errorHtml.begin(); it != _errorHtml.end(); it++)
@@ -52,8 +37,6 @@ void						ResponseHeader::changeHtmlRelativePath ()
 	}
 }
 
-//errormap은 config파일에서 읽은 그대로 사용해야 한다.
-//일단 내 맘대로 초기화했다.
 void						ResponseHeader::initErrorMap ()
 {
 	_errorMap[Continue] = "Continue";
@@ -86,7 +69,7 @@ std::string					ResponseHeader::writeHeader ()
 	if (_allow != "")
 		header += "Allow: " + _allow + "\r\n";
 	
-	//request header와 겹침
+	
 	if (_contentLanguage != "")
 		header += "Content-Language: " + _contentLanguage + "\r\n";
 	if (_contentLength != "" && _transferEncoding != "chunked")
@@ -109,7 +92,7 @@ std::string					ResponseHeader::writeHeader ()
 	if (_server != "")
 		header += "Server: " + _server + "\r\n";
 
-	//request header와 겹치는 것
+	
 	if (_transferEncoding != "" && _transferEncoding != "chunked")
 		header += "Transfer-Encoding: " + _transferEncoding + "\r\n";
 	if (_transferEncoding == "chunked")
@@ -132,12 +115,10 @@ std::string					ResponseHeader::getStatusMessage (int code)
 
 void						ResponseHeader::initRequest ()
 {
-	//general header reset
 	_date = "";
 	_connection = "";
 	_transferEncoding = "";
 
-	//Entity header reset
 	_contentLength = "";
 	_contentType = "";
 	_contentLanguage = "";
@@ -145,7 +126,6 @@ void						ResponseHeader::initRequest ()
 	_contentEncoding = "";
 	_allow = "";
 
-	//request header reset
 	_listen.host = 0;
 	_listen.port = 0;
 	_host = "";
@@ -162,7 +142,6 @@ void						ResponseHeader::initRequest ()
 	_body = "";
 	_code = 0;
 
-	//response header reset
 	_wwwAuthenticate = "";
 	_retryAfter = "";
 	_lastModified = "";
@@ -172,32 +151,23 @@ void						ResponseHeader::initRequest ()
 
 void						ResponseHeader::resetRequest ()
 {
-	//response header reset
 	initRequest();
 	_server = "";
 }
 
 void						ResponseHeader::setHeader ()
-{//response하는데 필요한 헤더들을 세팅한다.
-	//general header value
+{
 	setDate();
 	setConnection(_connection);
 	setTransferEncoding(_transferEncoding);
 
-	//entity header
 	setContentLength(_path, _contentLength);
 	setContentTypeLocation(_path, _contentType, _contentLocation);
 	setContentLanguage(_contentLanguage);
 	setContentEncoding(_contentEncoding);
-	// setAllow(config);
-	//config파일을 파싱한 것을 인자로 받아서 보내주어 세팅하도록 한다.
 
-	//request header는 request를 파싱할 때 모두 세팅되어있으므로 필요 없다.
 	
-	//response header
 	setServer(_server);
-	setWwwAuthenticate(_code);
-	setRetryAfter(_code, DEFAULT_RETRY_AFTER);
 	setLastModified(_path);
 	setLocation(_code, _path);
 }
@@ -208,16 +178,6 @@ void						ResponseHeader::setServer (const std::string& server)
 		_server = "Webserv/1.0 (Unix)";
 	else
 		_server = server;
-}
-void						ResponseHeader::setWwwAuthenticate (int code)
-{
-	if (code == Unauthorized)
-		_wwwAuthenticate = "Basic realm=\"Access requires authentification\", charset=\"UTF-8\"";
-}
-void						ResponseHeader::setRetryAfter (int code, int sec)
-{
-	if (code == Service_Unavailable || code == Too_Many_Requests || code == Moved_Permanently)
-		_retryAfter = intToStr(sec);
 }
 
 void						ResponseHeader::setLastModified (const std::string& path)

@@ -30,11 +30,11 @@ class Response : public ResponseHeader
 
 		int			verifyMethod (int fd, int requestEnd, int autoindex, std::string index, Cgi& cgi);
 
-		std::string	execGET (std::string& path, int fd, int autoindex, std::string index);
-		std::string	execHEAD (std::string& path, int fd, int autoindex, std::string index);
-		std::string	execPOST (const std::string& path, int fd, const std::string& body, Cgi& cgi);
-		std::string	execPUT (const std::string& path, int fd, std::string& body);
-		std::string	execDELETE (std::string& path, int fd);
+		std::string	execGET (std::string& path, int autoindex, std::string index);
+		std::string	execHEAD (std::string& path, int autoindex, std::string index);
+		std::string	execPOST (const std::string& path, const std::string& body, Cgi& cgi);
+		std::string	execPUT (const std::string& path, std::string& body);
+		std::string	execDELETE (std::string& path);
 
 		std::string	readHtml (const std::string& path);
 
@@ -45,8 +45,6 @@ class Response : public ResponseHeader
 		size_t		_totalSendSize;
 		size_t		_sendStartPos;
 		std::string	_totalResponse;
-
-		// int	_code;
 };
 
 #endif

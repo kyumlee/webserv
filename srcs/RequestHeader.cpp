@@ -17,7 +17,7 @@ int				RequestHeader::checkRequestLine (std::string requestLine)
 
 	_method = *requestLineIt++;
 	
-	//method가 대문자가 아니라면 바로 종료
+	
 	if (isStrUpper(_method) == 0)
 		return (1);
 
@@ -27,16 +27,14 @@ int				RequestHeader::checkRequestLine (std::string requestLine)
 		_path = _path.substr(1, _path.length() - 1);
 	if (_path != "/" && _path.at(_path.length() - 1) == '/')
 		_path = _path.substr(0, _path.length() - 1);
-
-	//GET method이고, requestLine이 2개의 단어로 이루어져 있다면 HTTP/0.9버전이다.
-	//일단 바로 종료하도록 9를 리턴하도록 하자
+	
 	if (_method == "GET" && requestLineVec.size() == 2)
 	{
 		_httpVersion = "HTTP/0.9";
 		setConnection("close");
 		return (9);
 	}
-	//GET method가 아닌데 2개의 단어로 이루어져 있다면 에러
+	
 	else if (requestLineVec.size() == 2)
 		return (printErr("invalid request line"));
 
@@ -94,16 +92,14 @@ int				RequestHeader::checkHeader (std::vector<std::string> header)
 			_connection = findHeaderValue(*it);
 		else if (strncmp((*it).c_str(), "X-Secret-Header-For-Test:", 25) == 0)
 			_xHeader = findHeaderValue(*it);
-		//이상한 header값일 때 :(콜론)과 ' '(공백)을 확인하여 에러처리
-		//:(콜론)이 없는데 ' '(공백)이 있다면 에러, 콜론이 없더라도 공백이 없으면 에러가 아님
-		//공백은 무조건 콜론 뒤에서만 허용된다.
+	
 		else
 		{
 			if (checkAvailableHeader(*it) == 1)
 				return (printErr("invalid request header"));
 		}
 	}
-	//contentLength가 있고, transferEncoding은 없을 때
+
 	if (_contentLength != "" && _transferEncoding == "")
 	{
 		if (isNumber(_contentLength) == 0)
@@ -124,19 +120,19 @@ int				RequestHeader::checkAvailableHeader (const std::string& header, char colo
 {
 	size_t	colonPos, spacePos;
 
-	//공백이 없으면 정상 작동
+
 	if ((spacePos = header.find_first_of(space)) == std::string::npos)
 		return (0);
 
-	//공백이 있고 콜론이 없으면 에러
+
 	else if ((colonPos = header.find_first_of(colon)) == std::string::npos)
 		return (1);
 
-	//공백이 있고 콜론이 있을 때 공백이 콜론보다 앞에 있으면 에러
+
 	else if (spacePos < colonPos)
 		return (1);
 
-	//공백이 있고 콜론이 있을 때 공백이 콜론보다 뒤에 있으면 정상
+
 	else
 		return (0);
 }
@@ -148,7 +144,7 @@ int				RequestHeader::checkEssentialHeader ()
 	if (_host == "")
 		return (printErr("host doesn't exist"));
 
-	//Content-Type, Content-Length(or Transfer-Encoding)이 있어야 한다.
+
 	if (_method == "PUT" || _method == "POST")
 	{
 		if (_contentLength != "" && _transferEncoding != "")
@@ -171,7 +167,7 @@ int				RequestHeader::splitRequest (std::string request, int bodyCondition)
 
 	while ((rPos = request.find('\n', start)) != std::string::npos)
 	{
-		//\r을 계속 찾아서 그것을 기준으로 vector에 넣어주자.
+	
 		if (request.at(start) == '\r')
 		{
 			if (start + 1 == rPos)
@@ -186,7 +182,7 @@ int				RequestHeader::splitRequest (std::string request, int bodyCondition)
 		rPos += 1;
 		start = rPos;
 	}
-	//요청이 한 줄만 왔을 때
+
 	if (strHeader.size() == 1 && bodyCondition == No_Body)
 	{
 		if (_httpVersion != "HTTP/0.9")
@@ -236,6 +232,8 @@ std::string		RequestHeader::getHttpVersion () const { return (_httpVersion); }
 std::string		RequestHeader::getBody () const { return (_body); }
 size_t			RequestHeader::getBodySize () const { return (_bodySize); }
 std::string		RequestHeader::getRoot () const { return (_root); }
+std::string		RequestHeader::getXHeader () const { return (_xHeader); }
+std::vector<std::string>	RequestHeader::getBodyVec() { return (_bodyVec); }
 
 void			RequestHeader::printRequestHeader ()
 {
@@ -254,3 +252,9 @@ void			RequestHeader::printRequestHeader ()
 	std::cout << "body size: " << _bodySize << std::endl;
 	std::cout << "root: " << _root << std::endl;
 }
+
+void			RequestHeader::addBodyVec(const std::string& body)
+{ _bodyVec.push_back(body); }
+void			RequestHeader::addBody(const std::string& body)
+{ _body += body; }
+void			RequestHeader::resetBodyVec() { _bodyVec.clear(); }
