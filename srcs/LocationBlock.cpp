@@ -107,16 +107,7 @@ int							LocationBlock::parseModMatch()
 
 	if (_block[pos] == '/')
 		setMod(NONE);
-	else if (_block[pos] == '=')
-	{
-		setMod(EXACT);
-		pos++;
-	}
-	else if (_block[pos] == '^' && _block[pos] == '~')
-	{
-		setMod(PREFERENTIAL);
-		pos += 2;
-	}
+	
 	while (std::isspace(_block[pos]))
 		pos++;
 
@@ -126,8 +117,6 @@ int							LocationBlock::parseModMatch()
 	setURI(_block.substr(pos, bracketPos - 1 - pos));
 	if (_uri != "/" && _uri.at(0) == '/')
 		_uri = _uri.substr(1, _uri.length() - 1);
-
-	std::cout << GREEN << "location block uri: " << getURI() << RESET << std::endl;
 
 	return (0);
 }

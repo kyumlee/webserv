@@ -109,8 +109,6 @@ void					EntityHeader::setContentTypeLocation(const std::string& path, std::stri
 	
 	if (contentLocation != "")
 		_contentLocation = contentLocation;
-	else if (fileType == "")
-		_contentLocation = checkContentLocation + pureFileName;
 	else
 		_contentLocation = path;
 

@@ -168,17 +168,8 @@ int							compareURIs(std::string URI, std::string request, int mod)
 	temp = &URI[pos];
 	if (URI[pos] != '*')
 	{
-		if (mod == EXACT)
-		{
-			if (temp == &request[1])
-				return (0);
-		}
-
-		if (mod == NONE || mod == PREFERENTIAL)
-		{
-			if (temp.find(&request[1], 0) != std::string::npos)
-				return (0);
-		}
+		if (temp.find(&request[1], 0) != std::string::npos)
+			return (0);
 		return (1);
 	}
 
@@ -188,13 +179,7 @@ int							compareURIs(std::string URI, std::string request, int mod)
 		return (1);
 	temp2 = request.substr(request.find(start, 0), request.length() - request.find(start, 0));
 
-	if (mod == EXACT)
-	{
-		if (temp == temp2)
-			return (0);
-	}
-
-	if (mod == NONE || mod == PREFERENTIAL)
+	if (mod == NONE)
 	{
 		if (temp.find(temp2, 0) != std::string::npos)
 			return (0);
@@ -392,6 +377,22 @@ std::string					strDeleteRN(const std::string& str)
 	if ((rPos = retStr.find("\r\n")) != std::string::npos)
 		retStr = retStr.substr(0, rPos);
 	return (retStr);
+}
+
+std::string					allDeleteRN(const std::string& str)
+{
+	std::string	ret = str;
+	while (ret.find("\r") != std::string::npos)
+	{
+		size_t	r_pos = ret.find("\r");
+		ret.erase(ret.begin() + r_pos);
+	}
+	while (ret.find("\n") != std::string::npos)
+	{
+		size_t	n_pos = ret.find("\n");
+		ret.erase(ret.begin() + n_pos);
+	}
+	return (ret);
 }
 
 int							isStrAlpha(const std::string& str)

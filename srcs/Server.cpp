@@ -25,7 +25,9 @@ Server::Server()
 	_serverErrorPages(),
 	_clientMaxBodySize(),
 	_autoindex(),
+	_serverautoindex(),
 	_index(),
+	_serverindex(),
 	_configCgi(),
 	_locations(),
 	_cgi()
@@ -55,7 +57,9 @@ Server::Server (const Server& server)
 	_serverErrorPages(server._serverErrorPages),
 	_clientMaxBodySize(server._clientMaxBodySize),
 	_autoindex(server._autoindex),
+	_serverautoindex(server._serverautoindex),
 	_index(server._index),
+	_serverindex(server._serverindex),
 	_configCgi(server._configCgi),
 	_locations(server._locations),
 	_cgi(server._cgi)
@@ -96,7 +100,9 @@ Server&						Server::operator=(const Server& server)
 
 	_clientMaxBodySize = server._clientMaxBodySize;
 	_autoindex = server._autoindex;
+	_serverautoindex = server._serverautoindex;
 	_index = server._index;
+	_serverindex = server._serverindex;
 	_configCgi = server._configCgi;
 
 	_locations = server._locations;
@@ -115,6 +121,7 @@ void						Server::changeEvents(std::vector<struct kevent>& changeList, uintptr_t
 void						Server::disconnectRequest(int fd)
 {
 	std::cout << "request disconnected: " << fd << std::endl << std::endl << std::endl;
+	// std::cout << "request disconnected: " << fd << std::endl;
 	resetRequest(fd);
 	close(fd);
 	_request.erase(fd);
@@ -132,7 +139,7 @@ int							Server::initListen(const std::string& hostPort)
 		return (printErr("failed to listen"));
 
 	std::cout << "init listen host : " << _listen.host;
-	std::cout << ", port : " << _listen.port << std::endl;
+	std::cout << ", port : " << ntohs(_listen.port) << std::endl;
 
 	return (0);
 }
@@ -161,6 +168,7 @@ int							Server::initServerSocket()
 		return (printErr("failed to init kqueue"));
 
 	_kq = kq;
+	std::cout << RED << "init kq: " << kq << RESET << std::endl;
 	changeEvents(_changeList, _serverSocket, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, NULL);
 
 	return (0);
@@ -244,7 +252,9 @@ void						Server::initServerErrorPages()
 void						Server::setServerRoot(const std::string& root) { _serverRoot = root; }
 void						Server::setClientMaxBodySize(const size_t& size) { _clientMaxBodySize = size; }
 void						Server::setAutoindex(const int& autoindex) { _autoindex = autoindex; }
+void						Server::setServerAutoIndex(const int& serverautoindex) { _serverautoindex = serverautoindex; }
 void						Server::setIndex(const std::vector<std::string>& index) { _index = index; }
+void						Server::setServerIndex(const std::vector<std::string>& serverindex) { _serverindex = serverindex; }
 
 void						Server::addLocation(LocationBlock& lb) { _locations.push_back(lb); }
 
@@ -282,18 +292,9 @@ LocationBlock				Server::selectLocationBlock(std::string requestURI)
 	for (size_t i = 1; i < requestURIvec.size(); i++)
 		requestURIvec[i] = "/" + requestURIvec[i];
 
-	for (size_t i = 0; i < _locations.size(); i++) {
-		if (_locations[i].getMod() == EXACT) {
-			if (_locations[i].getURI() == requestURI)
-				return (_locations[i]);
-			else
-				break ;
-		}
-	}
-
 	for (size_t i = 0; i < _locations.size(); i++)
 	{
-		if (_locations[i].getMod() == NONE || _locations[i].getMod() == PREFERENTIAL)
+		if (_locations[i].getMod() == NONE)
 		{
 			if (_locations[i].getURI() == requestURIvec[0])
 			{
@@ -404,6 +405,8 @@ void						Server::resetRequest(int fd)
 	_response[fd].setBody("");
 	_response[fd].getRoot() = _serverRoot;
 	_index.clear();
+	_index = _serverindex;
+	_autoindex = _serverautoindex;
 }
 
 void						Server::eventRead(int fd)
@@ -437,15 +440,15 @@ void						Server::eventRead(int fd)
 			_request[fd] = _request[fd].substr(0, _bodyStartPos[fd] + _response[fd].getBodySize());
 		}
 
-		if (_request[fd] == "\r\n" && _checkedRequestLine[fd] == 0)
-		{
-			_request[fd].clear();
-			printErr("request line is empty");
-			return ;
-		}
-
 		if (_request[fd].find("\r\n") != std::string::npos && _checkedRequestLine[fd] == 0)
 		{
+			std::string	temp_str = allDeleteRN(_request[fd]);
+			if (temp_str == "")
+			{
+				_request[fd].clear();
+				printErr("request line is empty");
+				return ;
+			}
 			if (_request[fd].at(0) == '\r' && _request[fd].at(1) == '\n')
 				_request[fd] = _request[fd].substr(2, _request[fd].length() - 2);
 			if (_request[fd].at(0) == '\n')
@@ -553,7 +556,10 @@ void						Server::eventRead(int fd)
 					_bodyVecSize[fd] = hexToDecimal(bodySizeStr);
 					_bodyVecTotalSize[fd] += _bodyVecSize[fd];
 					if (_bodyVecTotalSize[fd] > _clientMaxBodySize && _clientMaxBodySize != 0)
+					{
+						std::cout << "body total size is big so set code payload\n";
 						_response[fd].setCode(Payload_Too_Large);
+					}
 					_bodyVecStartPos[fd] = bodySize + 2;
 					_rnPos[fd] = _bodyVecStartPos[fd] + _bodyVecSize[fd] + 2;
 				}
@@ -607,8 +613,11 @@ void						Server::eventRead(int fd)
 				else
 				{
 					_response[fd].setBody(_request[fd].substr(_bodyStartPos[fd], _request[fd].length() - _bodyStartPos[fd]));
-					if (_response[fd].getBody().length() > _clientMaxBodySize)
+					if (_clientMaxBodySize != 0 && _response[fd].getBody().length() > _clientMaxBodySize)
+					{
+						std::cout << "get body size is big so set code payload\n";
 						_response[fd].setCode(Payload_Too_Large);
+					}
 				}
 			}
 		}

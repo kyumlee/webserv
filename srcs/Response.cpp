@@ -151,8 +151,11 @@ int			Response::verifyMethod(int fd, int requestEnd, int autoindex, std::string 
 
 	if (_remainSend == false)
 	{
+
 		_sendStartPos = 0;
 		_totalSendSize = 0;
+		if (getCode() == Internal_Server_Error)
+			ret = 1;
 		std::cout << RED << "#######response[" << fd << "] send!!!!!" << std::endl << RESET;
 		if (_totalResponse.length() > 300)
 			std::cout << YELLOW << _totalResponse.substr(0, 250) << " ... " << _totalResponse.substr(_totalResponse.length() - 20, 20) << RESET << std::endl;
@@ -171,7 +174,7 @@ std::string	Response::execGET(std::string& path, int autoindex, std::string inde
 	std::stringstream	buffer;
 	std::string			html = setHtml(path, "en", "utf-8", "directory listing", sizetToStr(_listen.host), _listen.port);
 
-	if (autoindex == 0 && html != "")
+	if (autoindex == OFF && html != "")
 	{
 		setCode(OK);
 		_contentType = "text/html";
@@ -179,25 +182,34 @@ std::string	Response::execGET(std::string& path, int autoindex, std::string inde
 	}
 	else
 	{
-		if (autoindex == 1 && pathIsFile(path) == 2)
+		if (autoindex == ON && pathIsFile(path) == 2)
 		{
 			if (path == "/")
 				path = getRoot();
 			if (path.back() != '/')
 				path += "/";
 			path += index;
-
 		}
-		file.open(path.c_str(), std::ifstream::in);
-		if (file.is_open() == false)
+		if (pathIsFile(path) == 1)
 		{
-			printErr("failed to open");
-			setCode(Not_Found);
+			file.open(path.c_str(), std::ifstream::in);
+			if (file.is_open() == false)
+			{
+				std::cerr << GREEN << "@@@@@@@@@@@@@@@@@file open fail@@@@@@@@@@@@@@@@\n";
+				std::cerr << path << " failed to open so code is Internal_Server_Error\n" << RESET;
+				setCode(Internal_Server_Error);
+			}
+			else
+			{
+				// std::cout << YELLOW << "get response path: " << path << RESET << std::endl;
+				setCode(OK);
+				buffer << file.rdbuf();
+			}
 		}
 		else
 		{
-			setCode(OK);
-			buffer << file.rdbuf();
+			buffer << path << " is not file\n";
+			setCode(Not_Found);
 		}
 	}
 	setContentLength(buffer.str().length());
@@ -339,19 +351,29 @@ std::string	Response::readHtml(const std::string& path)
 {
 	std::ofstream			file;
 	std::stringstream		buf;
+	std::string				error_ret;
 
+	error_ret = "error code: " + intToStr(getCode()) + " " + path;
 	if (pathIsFile(path))
 	{
 		file.open(path.c_str(), std::ifstream::in);
 		if (file.is_open() == false)
-			return (ERROR_HTML);
+		{
+			// return (ERROR_HTML);
+			error_ret += " open fail\n";
+			return (error_ret);
+		}
 		buf << file.rdbuf();
 		file.close();
 		_contentType = "text/html";
 		return (buf.str());
 	}
 	else
-		return (ERROR_HTML);
+	{
+		// return (ERROR_HTML);
+		error_ret += "is not file\n";
+		return (error_ret);
+	}
 }
 
 void		Response::printResponseValue()

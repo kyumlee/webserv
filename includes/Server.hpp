@@ -44,7 +44,9 @@ class Server
 		void						setServerRoot(const std::string& root);
 		void						setClientMaxBodySize(const size_t& size);
 		void						setAutoindex(const int& autoindex);
+		void						setServerAutoIndex(const int& serverautoindex);
 		void						setIndex(const std::vector<std::string>& index);
+		void						setServerIndex(const std::vector<std::string>& serverindex);
 		void						addLocation(LocationBlock& lb);
 
 		void						setCgiEnv(int fd);
@@ -86,7 +88,9 @@ class Server
 
 		size_t						_clientMaxBodySize;
 		int							_autoindex;
+		int							_serverautoindex;
 		std::vector<std::string>	_index;
+		std::vector<std::string>	_serverindex;
 		std::string					_configCgi;
 
 		std::vector<LocationBlock>	_locations;

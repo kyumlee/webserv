@@ -99,6 +99,8 @@ int							RequestHeader::checkRequestLine(std::string requestLine)
 	if (_httpVersion != "HTTP/1.0" && _httpVersion != "HTTP/1.1")
 		return (printErr("invalid request line"));
 
+	// std::cout << RED << "request line: " << _method << " " << _path << " " <<  _httpVersion << RESET << std::endl;
+
 	return (0);
 }
 

@@ -1,0 +1,21 @@
+make --dry-run --always-make --keep-going --print-directory
+make: Entering directory `/Users/ljw/Desktop/k_webserv'
+echo "\033[34m\n Compiling . . .\n\033[0m"
+c++ -Wall -Wextra -Werror -std=c++98 -c main.cpp -o main.o
+c++ -Wall -Wextra -Werror -std=c++98 -c srcs/Cgi.cpp -o srcs/Cgi.o
+c++ -Wall -Wextra -Werror -std=c++98 -c srcs/Config.cpp -o srcs/Config.o
+c++ -Wall -Wextra -Werror -std=c++98 -c srcs/EntityHeader.cpp -o srcs/EntityHeader.o
+c++ -Wall -Wextra -Werror -std=c++98 -c srcs/GeneralHeader.cpp -o srcs/GeneralHeader.o
+c++ -Wall -Wextra -Werror -std=c++98 -c srcs/LocationBlock.cpp -o srcs/LocationBlock.o
+c++ -Wall -Wextra -Werror -std=c++98 -c srcs/RequestHeader.cpp -o srcs/RequestHeader.o
+c++ -Wall -Wextra -Werror -std=c++98 -c srcs/Response.cpp -o srcs/Response.o
+c++ -Wall -Wextra -Werror -std=c++98 -c srcs/ResponseHeader.cpp -o srcs/ResponseHeader.o
+c++ -Wall -Wextra -Werror -std=c++98 -c srcs/Server.cpp -o srcs/Server.o
+c++ -Wall -Wextra -Werror -std=c++98 -c srcs/ServerBlock.cpp -o srcs/ServerBlock.o
+c++ -Wall -Wextra -Werror -std=c++98 -c srcs/Utils.cpp -o srcs/Utils.o
+echo "\033[33m Linking object file(s) . . .\n\033[0m"
+c++ -Wall -Wextra -Werror -std=c++98 ./main.o ./srcs/Cgi.o ./srcs/Config.o ./srcs/EntityHeader.o ./srcs/GeneralHeader.o ./srcs/LocationBlock.o ./srcs/RequestHeader.o ./srcs/Response.o ./srcs/ResponseHeader.o ./srcs/Server.o ./srcs/ServerBlock.o ./srcs/Utils.o -o webserv -I.
+echo "\033[32m OK \033[0m"
+rm compile
+make: Leaving directory `/Users/ljw/Desktop/k_webserv'
+ 

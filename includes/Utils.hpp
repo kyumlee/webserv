@@ -136,6 +136,7 @@ std::string					eraseFileType(const std::string& file);
 std::string					strTrimChar(const std::string& str, char deleteChar = ' ');
 std::string					findHeaderValue(const std::string& header);
 std::string					strDeleteRN(const std::string& str);
+std::string					allDeleteRN(const std::string& str);
 
 int							isStrAlpha(const std::string& str);
 int							isStrUpper(const std::string& str);

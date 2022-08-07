@@ -225,7 +225,7 @@ void						ResponseHeader::setLastModified(const std::string& path)
 
 void						ResponseHeader::setLocation(int code, const std::string& path)
 {
-	if (code == Created || code / 100 == 3)
+	if (code == Created)
 		_location = path;
 }
 

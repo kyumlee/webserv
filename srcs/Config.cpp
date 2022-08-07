@@ -51,11 +51,13 @@ int	Config::startServer ()
 {
 	for (size_t i = 0; i < _serverVec.size(); i++)
 	{
-		
+		std::cout << "i: " << i << ", server vec size: " << _serverVec.size() << std::endl;
 		if (_serverVec[i].initServerSocket() == 1)
 		{
 			printErr("failed to init server");
+			std::cerr << "erase server[" << i << "] port: " << ntohs((*(_serverVec.begin() + i)).getListen().port) << std::endl;
 			_serverVec.erase(_serverVec.begin() + i);
+			i--;
 		}
 	}
 
@@ -69,7 +71,7 @@ int	Config::startServer ()
 
 		newEventsVec.push_back(newEvents);
 		currEventVec.push_back(&currEvent);
-		std::cout << YELLOW << "host : " << (*it).getListen().host << ", port : " << (*it).getListen().port;
+		std::cout << YELLOW << "host : " << (*it).getListen().host << ", port : " << ntohs((*it).getListen().port);
 		std::cout << " server start!!!!!!" << std::endl << RESET;
 	}
 
@@ -99,11 +101,14 @@ int	Config::startServer ()
 
 			if (newEventsVec[i] == -1)
 			{
-				printErr(intToStr(_serverVec[i].getListen().port) + " port kevent error");
+				printErr(intToStr(ntohs(_serverVec[i].getListen().port)) + " port kevent error");
+				std::cerr << "kq descriptor: " << _serverVec[i].getKq() << std::endl;
+				std::cerr << errno << std::endl;
 				_serverVec.erase(_serverVec.begin() + i);
 				newEventsVec.erase(newEventsVec.begin() + i);
 				currEventVec.erase(currEventVec.begin() + i);
-				break ;
+				i--;
+				continue ;
 			}
 			_serverVec[i].resetChangeList();
 
@@ -118,6 +123,7 @@ int	Config::startServer ()
 						_serverVec.erase(_serverVec.begin() + i);
 						newEventsVec.erase(newEventsVec.begin() + i);
 						currEventVec.erase(currEventVec.begin() + i);
+						i--;
 						break ;
 					}
 				}
@@ -164,7 +170,9 @@ int							Config::initServer(const std::string& conf)
 			_serverVec[v].setServerRoot(_serverBlock[i].getRoot());
 			_serverVec[v].setClientMaxBodySize(_serverBlock[i].getClntSize());
 			_serverVec[v].setAutoindex(_serverBlock[i].getAutoindex());
+			_serverVec[v].setServerAutoIndex(_serverBlock[i].getAutoindex());
 			_serverVec[v].setIndex(_serverBlock[i].getIndex());
+			_serverVec[v].setServerIndex(_serverBlock[i].getIndex());
 
 			for (size_t l = 0; l < _serverBlock[i].getLocationBlocks().size(); l++)
 				_serverVec[v].addLocation(_serverBlock[i].getLocationBlocks()[l]);
