@@ -142,7 +142,7 @@ void						ResponseHeader::initErrorMap()
 	_errorMap[Internal_Server_Error] = "Internal Server Error";
 }
 
-void						ResponseHeader::initRequest()
+void						ResponseHeader::resetRequest()
 {
 	_date = "";
 	_connection = "";
@@ -176,11 +176,7 @@ void						ResponseHeader::initRequest()
 	_lastModified = "";
 	_location = "";
 	_bodySize = 0;
-}
 
-void						ResponseHeader::resetRequest()
-{
-	initRequest();
 	_server = "";
 }
 

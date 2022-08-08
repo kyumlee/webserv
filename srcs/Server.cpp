@@ -168,7 +168,6 @@ int							Server::initServerSocket()
 		return (printErr("failed to init kqueue"));
 
 	_kq = kq;
-	std::cout << RED << "init kq: " << kq << RESET << std::endl;
 	changeEvents(_changeList, _serverSocket, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, NULL);
 
 	return (0);
@@ -202,7 +201,7 @@ void						Server::requestAccept()
 	changeEvents(_changeList, requestSocket, EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, NULL);
 	_request[requestSocket] = "";
 
-	_response[requestSocket].initRequest();
+	_response[requestSocket].resetRequest();
 	_response[requestSocket].initPossibleMethods();
 	_response[requestSocket].initErrorMap();
 	_bodyCondition[requestSocket] = No_Body;
@@ -388,7 +387,7 @@ void						Server::resetRequest(int fd)
 	_request[fd].clear();
 	_requestEnd[fd] = 0;
 	_bodyCondition[fd] = No_Body;
-	_response[fd].initRequest();
+	_response[fd].resetRequest();
 	_checkedRequestLine[fd] = 0;
 	_bodyStartPos[fd] = 0;
 	_bodyEnd[fd] = 0;

@@ -26,17 +26,12 @@
 
 # define DEFAULT_CONF		"./conf/mac2.conf"
 # define NONE				0
-# define EXACT				1
-# define PREFERENTIAL		2
-# define DEFAULT_AUTOINDEX	2
 # define ON					1
 # define OFF				0
 
 # define CGI_BUFFER_SIZE 	50000
 # define LISTEN_BUFFER_SIZE 1024
 # define READ_BUFFER_SIZE	100000
-
-# define DEFAULT_RETRY_AFTER	10
 
 # define ERROR_HTML "<!DOCTYPE html>\n\
 	<html lang=\"en\">\n\
@@ -125,6 +120,7 @@ std::string					sizetToStr(size_t code);
 void						printVec(std::vector<std::string> strVec);
 void						printSet(std::set<std::string> strSet);
 void						printErrmap(std::map<int, std::string> errmap);
+void						printStr(const std::string& str, const std::string& response);
 
 int							compareEnd(const std::string& s1, const std::string& s2);
 
@@ -138,7 +134,6 @@ std::string					findHeaderValue(const std::string& header);
 std::string					strDeleteRN(const std::string& str);
 std::string					allDeleteRN(const std::string& str);
 
-int							isStrAlpha(const std::string& str);
 int							isStrUpper(const std::string& str);
 
 int							makeHtml(const std::string& htmlName, int code, const std::string& codeStr, const std::string& serverName);
@@ -149,7 +144,5 @@ size_t						calExponent(const std::string& str);
 
 int							checkHex(std::string& hex);
 size_t						hexToDecimal(std::string& hex);
-
-void						printStr(const std::string& str, const std::string& response);
 
 #endif

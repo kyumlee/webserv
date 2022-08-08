@@ -28,7 +28,6 @@ class ResponseHeader : public RequestHeader
 		void						changeHtmlRelativePath();
 		void						initErrorMap();
 
-		void						initRequest();
 		void						resetRequest();
 
 		void						setHeader();

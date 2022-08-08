@@ -25,7 +25,6 @@ class Cgi
 		std::string							executeCgi(const std::string& scriptName);
 
 		void								printEnv();
-		void								initEnv();
 	
 	private:
 		std::map<std::string, std::string>	_env;

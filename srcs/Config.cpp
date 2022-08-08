@@ -51,7 +51,6 @@ int	Config::startServer ()
 {
 	for (size_t i = 0; i < _serverVec.size(); i++)
 	{
-		std::cout << "i: " << i << ", server vec size: " << _serverVec.size() << std::endl;
 		if (_serverVec[i].initServerSocket() == 1)
 		{
 			printErr("failed to init server");

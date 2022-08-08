@@ -395,16 +395,6 @@ std::string					allDeleteRN(const std::string& str)
 	return (ret);
 }
 
-int							isStrAlpha(const std::string& str)
-{
-	for (std::string::const_iterator it = str.begin(); it != str.end(); it++)
-	{
-		if (std::isalpha(*it) == 0)
-			return (0);
-	}
-	return (1);
-}
-
 int							isStrUpper(const std::string& str)
 {
 	for (std::string::const_iterator it = str.begin(); it != str.end(); it++)

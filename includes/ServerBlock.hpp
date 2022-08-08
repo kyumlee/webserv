@@ -48,7 +48,6 @@ class	ServerBlock
 
 		int							parse();
 
-		std::vector<LocationBlock>	findMatchingLocationBlocks(std::string requestURI) const;
 		LocationBlock				selectLocationBlock(std::string requestURI) const;
 
 		void						printServerBlock();
